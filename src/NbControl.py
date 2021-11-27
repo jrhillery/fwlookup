@@ -1,6 +1,7 @@
+# Use Selenium web driver to launch and control a browser session
 from datetime import date, datetime
 
-from org.openqa.selenium import By, WebDriver, WebDriverException, WebElement
+from org.openqa.selenium import By, WebDriverException, WebElement
 from org.openqa.selenium.chrome import ChromeDriver, ChromeOptions
 from org.openqa.selenium.support.ui import ExpectedConditions, WebDriverWait
 from typing import Iterator, List, Optional
@@ -22,7 +23,7 @@ class NbControl(object):
     # end __init__(FwLookupWindow)
 
     def getHoldingsDriver(self):
-        # type: () -> Optional[WebDriver]
+        # type: () -> Optional[ChromeDriver]
         # open browser instance
         try:
             crOpts = ChromeOptions()

@@ -19,9 +19,9 @@ if __name__ == "__main__":
 
             if nbCtrl.navigateToHoldingsDetails():
                 global moneydance  # type: FeatureModuleContext
-                imprtr = NbImporter(lookupWin, moneydance.currentAccountBook)
-                imprtr.obtainPrices(nbCtrl.getTitle(), nbCtrl.getHoldings())
-                lookupWin.enableCommitButton(imprtr.isModified())
+                importer = NbImporter(lookupWin, moneydance.currentAccountBook)
+                importer.obtainPrices(nbCtrl.getTitle(), nbCtrl.getHoldings())
+                lookupWin.enableCommitButton(importer.isModified())
         else:
             lookupWin.addText("Not started via Moneydance, close this window to clean up")
             nbCtrl.showInFront()

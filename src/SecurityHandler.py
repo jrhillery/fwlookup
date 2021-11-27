@@ -1,3 +1,4 @@
+# Persist and apply Moneydance securities price quotes
 from decimal import Decimal
 
 from com.infinitekind.moneydance.model import CurrencySnapshot, CurrencyType

@@ -1,3 +1,4 @@
+# Find and save Moneydance securities price quotes
 from datetime import date
 from decimal import Decimal, ROUND_HALF_EVEN
 
@@ -118,7 +119,8 @@ class NbImporter(object):
                 self.display(
                     "FWIMP06: Unable to obtain Moneydance security "
                     "[{} ({})] in account {}.".format(
-                        security.getName(), security.getTickerSymbol(), account.getAccountName()))
+                        security.getName(), security.getTickerSymbol(),
+                        account.getAccountName()))
             else:
                 balance = getCurrentBalance(secAccount)  # type: Decimal
 
