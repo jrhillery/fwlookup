@@ -1,0 +1,9 @@
+{
+  "vendor" = "John Hillery"
+  "module_build" = "1"
+  "minbuild" = "1000"
+  "vendor.url" = "http://your.url.here/"
+  "module_name" = "FW Lookup"
+  "module_desc" = "<html><body><title>FW Lookup</title><p>Module used to lookup Fidelity NetBenefits&reg; workplace account data and sync with Moneydance.</p></body></html>"
+  "desc" = "Module used to lookup Fidelity NetBenefits workplace account data and sync with Moneydance."
+}
