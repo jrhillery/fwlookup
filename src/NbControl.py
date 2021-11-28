@@ -32,7 +32,7 @@ class NbControl(object):
 
             return self.webDriver
         except WebDriverException as e:
-            self.reportError("Unable to open browser with " + ", ".join(NbControl.CHROME_USER_DATA), e)
+            self.reportError("Unable to open browser with " + NbControl.CHROME_USER_DATA, e)
     # end getHoldingsDriver()
 
     def navigateToHoldingsDetails(self):
@@ -137,4 +137,4 @@ if __name__ == "__main__":
 
         if nbCtrl.navigateToHoldingsDetails():
             for hldn in nbCtrl.getHoldings():
-                lookupWin.addText(str(hldn))
+                lookupWin.addText(hldn.__str__())

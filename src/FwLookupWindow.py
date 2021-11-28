@@ -96,14 +96,18 @@ class FwLookupWindow(JFrame):
 		# type: (AWTEvent) -> None
 		"""Process events on this window."""
 		if event.getID() == WindowEvent.WINDOW_CLOSING:
-			self.goAway()
-
-			if self.releaseResources:
-				# Release any resources we acquired.
-				self.releaseResources()
+			self.closeWindow()
 		else:
 			super(FwLookupWindow, self).processEvent(event)
 	# end processEvent(AWTEvent)
+
+	def closeWindow(self):
+		self.goAway()
+
+		if self.releaseResources:
+			# Release any resources we acquired.
+			self.releaseResources()
+	# end closeWindow()
 
 	def goAway(self):
 		# type: () -> None
