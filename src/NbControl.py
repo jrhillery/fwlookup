@@ -1,6 +1,7 @@
 # Use Selenium web driver to launch and control a browser session
 from datetime import date, datetime
 
+from java.lang import System
 from org.openqa.selenium import By, WebDriverException, WebElement
 from org.openqa.selenium.chrome import ChromeDriver, ChromeOptions
 from org.openqa.selenium.support.ui import ExpectedConditions, WebDriverWait
@@ -42,13 +43,16 @@ class NbControl(object):
             # open NetBenefits log-in page
             self.webDriver.get(NbControl.NB_LOG_IN)
 
-            # select 401(k) Plus Plan link
+            # wait for user to log-in
             ifXcptionMsg = "Timed out waiting for log-in"
             plusPlanLink = By.cssSelector(
                 "#client-employer a[aria-Label='IBM 401(K) PLUS PLAN Summary.']")  # type: By
             WebDriverWait(self.webDriver, 35) \
                 .until(ExpectedConditions.elementToBeClickable(plusPlanLink))
             self.showInFront()
+
+            # select 401(k) Plus Plan link
+            ifXcptionMsg = "Unable to select 401(k) Plus Plan"
             link = self.webDriver.findElement(plusPlanLink)
             self.webDriver.executeScript("arguments[0].click();", link)
 
@@ -111,8 +115,9 @@ class NbControl(object):
     def reportError(self, txtMsg, xcption):
         # type: (str, WebDriverException) -> None
         if self.lookupWindow:
-            self.lookupWindow.addText(txtMsg + ":<br />" + xcption.toString())
+            self.lookupWindow.addText(txtMsg + ":<br/>" + xcption.toString())
             self.showInFront()
+        xcption.printStackTrace(System.err)
     # end reportError(str, WebDriverException)
 
     def showInFront(self):

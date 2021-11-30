@@ -36,7 +36,7 @@ http://jakarta.apache.org/ant/index.html
         <src path="${swingutil}/src/main/java"/>
     </javac>
 
-    <jar destfile="${build}/fwlookup.mxt">
+    <jar destfile="${build}/fwlookup.mxt" duplicate="preserve">
       <fileset dir="${src}/src" includes="*.py"/>
       <fileset dir="${src}/src/main/resources"/>
       <fileset dir="${build}" includes="com/**"/>
@@ -51,9 +51,14 @@ http://jakarta.apache.org/ant/index.html
       <arg value="fwlookup"/>
       <arg line="${build}/fwlookup.mxt"/>
     </java>
-  	<delete file="${build}/fwlookup.mxt"/>
   	<delete dir="${build}/com"/>
     <move file="s-fwlookup.mxt" tofile="${dist}/fwlookup.mxt"/>
+  </target>
+
+  <target name="clean">
+    <delete deleteonexit="true">
+      <fileset dir="${build}" includes="*.mxt"/>
+    </delete>
   </target>
 
   <target name="genkeys" depends="init">
@@ -67,6 +72,6 @@ http://jakarta.apache.org/ant/index.html
     </java>
   </target>
 
-  <target name="all" depends="fwlookup"/>
+  <target name="all" depends="fwlookup, clean"/>
 
 </project>

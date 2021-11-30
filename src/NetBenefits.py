@@ -1,5 +1,6 @@
 # get Fidelity NetBenefits current balances
 from locale import LC_ALL, setlocale
+from site import getsitepackages, getusersitepackages
 
 from com.moneydance.apps.md.controller import FeatureModule, FeatureModuleContext
 from java.lang import System
@@ -50,8 +51,9 @@ class NetBenefits(object):
 
     def unload(self):
         # type: () -> None
-        self.lookupWindow.closeWindow()
-        self.lookupWindow = None
+        if self.lookupWindow:
+            self.lookupWindow.closeWindow()
+            self.lookupWindow = None
         self.fmContext = None
     # end unload()
 
@@ -72,6 +74,9 @@ class NetBenefits(object):
 
 # end class NetBenefits
 
+
+System.err.println("Python site packages = {}; user site packages = {}.".format(
+    ", ".join(getsitepackages()), getusersitepackages()))
 
 if "__file__" in globals():
     # running in MoneyBot console
