@@ -9,6 +9,7 @@ http://jakarta.apache.org/ant/index.html
   <property name="moneydance.devkit" value="C:/Users/John/Documents/Prog/moneydance-devkit-5.1"/>
   <property name="mdutil" value="${src}/../mdutil/md-util"/>
   <property name="swingutil" value="${src}/../mdutil/swing-util"/>
+  <property name="selenium-java" value="${src}/../../ad/3rdParty/selenium-java-3.141.59"/>
   <property name="privkeyfile" value="${build}/priv_key"/>
   <property name="pubkeyfile" value="${build}/pub_key"/>
   <property name="privkeyid" value="99"/>
@@ -40,8 +41,12 @@ http://jakarta.apache.org/ant/index.html
       <fileset dir="${src}/src" includes="*.py"/>
       <fileset dir="${src}/src/main/resources"/>
       <fileset dir="${build}" includes="com/**"/>
+      <zipgroupfileset dir="${selenium-java}"
+                       includes="*.jar libs/*.jar"
+                       excludes="*-sources.jar"/>
     </jar>
 
+    <sleep seconds="5"/>
     <java classname="com.moneydance.admin.KeyAdmin"
       classpathref="classpath"
       inputstring="fwlookup's passphrase">
