@@ -124,3 +124,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+/src/main/java/TstSel.java
