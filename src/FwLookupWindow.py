@@ -14,9 +14,9 @@ from typing import Callable, Optional
 
 class FwLookupWindow(JFrame):
 
-	def __init__(self):
-		# type: () -> None
-		super(FwLookupWindow, self).__init__("Fidelity workplace lookup")
+	def __init__(self, title):
+		# type: (str) -> None
+		super(FwLookupWindow, self).__init__(title)
 		self.commitChanges = None  # type: Optional[Callable[[], None]]
 		self.isModified = None  # type: Optional[Callable[[], bool]]
 		self.releaseResources = None  # type: Optional[Callable[[], None]]
@@ -52,7 +52,7 @@ class FwLookupWindow(JFrame):
 					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 271, 0x7fff))
 		)
 		contentPane.layout = gl_contentPane
-	# end __init__()
+	# end __init__(str)
 
 	def pressCommit(self, event):
 		# type: (ActionEvent) -> None
@@ -123,7 +123,7 @@ class FwLookupWindow(JFrame):
 
 
 if __name__ == "__main__":
-	frame = FwLookupWindow()  # type: FwLookupWindow
+	frame = FwLookupWindow("FW Lookup Title")  # type: FwLookupWindow
 	frame.visible = True
 	amt = Decimal("123.50")
 	fmt = frame.getCurrencyFormat(amt)

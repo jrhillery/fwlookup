@@ -68,7 +68,7 @@ class NetBenefits(object):
             self.lookupWindow.toFront()
             self.lookupWindow.requestFocus()
         else:
-            self.lookupWindow = FwLookupWindow()
+            self.lookupWindow = FwLookupWindow(NetBenefits.name)
             self.lookupWindow.visible = True
     # end showWindow()
 

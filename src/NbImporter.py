@@ -47,7 +47,7 @@ class NbImporter(object):
         self.lookupWindow = lookupWindow
         self.root = accountBook.getRootAccount()  # type: Account
         self.securities = accountBook.getCurrencies()  # type: CurrencyTable
-        self.display = self.lookupWindow.addText  # type: Callable[[str], None]
+        self.display = lookupWindow.addText  # type: Callable[[str], None]
     # end __init__(FwLookupWindow, AccountBook)
 
     def commitChanges(self):

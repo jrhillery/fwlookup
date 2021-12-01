@@ -133,7 +133,7 @@ class NbControl(object):
 
 
 if __name__ == "__main__":
-    lookupWin = FwLookupWindow()
+    lookupWin = FwLookupWindow("NB Control Title")
     nbCtrl = NbControl(lookupWin)
     lookupWin.visible = True
 
