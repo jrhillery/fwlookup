@@ -7,11 +7,12 @@ from com.infinitekind.moneydance.model import CurrencyTable, CurrencyType
 from com.infinitekind.moneydance.model.Account.AccountType import ASSET
 from com.leastlogic.moneydance.util import SnapshotList, MdUtil
 from com.leastlogic.swing.util import HTMLPane
-from typing import Callable, Dict, Iterable, Set
+from typing import Dict, Iterable, Set
 
 from FwLookupWindow import FwLookupWindow
 from NbHolding import NbHolding
 from SecurityHandler import SecurityHandler
+from WindowInterface import WindowInterface
 
 
 def getCurrentBalance(account):
@@ -38,28 +39,27 @@ def convRateToPrice(rate, exp):
 class NbImporter(object):
     NB_ACCOUNT_NAME = "IBM 401k"
 
-    def __init__(self, lookupWindow, accountBook):
-        # type: (FwLookupWindow, AccountBook) -> None
+    def __init__(self, lookupWindow, winCtl, accountBook):
+        # type: (FwLookupWindow, WindowInterface, AccountBook) -> None
         self.priceChanges = {}  # type: Dict[CurrencyType, SecurityHandler]
         self.numPricesSet = 0  # type: int
         lookupWindow.commitChanges = self.commitChanges
         lookupWindow.isModified = self.isModified
-        self.lookupWindow = lookupWindow
+        self.winCtl = winCtl  # type: WindowInterface
         self.root = accountBook.getRootAccount()  # type: Account
         self.securities = accountBook.getCurrencies()  # type: CurrencyTable
-        self.display = lookupWindow.addText  # type: Callable[[str], None]
-    # end __init__(FwLookupWindow, AccountBook)
+    # end __init__(FwLookupWindow, WindowInterface, AccountBook)
 
     def commitChanges(self):
-        # type: () -> None
+        # type: () -> int
         """Commit any changes to Moneydance."""
         for sHandler in self.priceChanges.values():
             sHandler.applyUpdate()
 
-        self.display("FWIMP07: Changed {} security price{}.".format(
-            self.numPricesSet, "" if self.numPricesSet == 1 else "s"))
-
+        numPricesSet = self.numPricesSet
         self.forgetChanges()
+
+        return numPricesSet
     # end commitChanges()
 
     def isModified(self):
@@ -73,8 +73,8 @@ class NbImporter(object):
             balance = getCurrentBalance(account)  # type: Decimal
 
             if holding.bal != balance:
-                cf = self.lookupWindow.getCurrencyFormat(holding.bal)
-                self.display(
+                cf = self.winCtl.getCurrencyFormat(holding.bal)
+                self.winCtl.display(
                     "FWIMP02: Found a different balance in account {}: have {}, found {}. "
                     "Note: No Moneydance security {} for ticker symbol ({}).".format(
                         account.getAccountName(), cf.format(balance), cf.format(holding.bal),
@@ -96,8 +96,8 @@ class NbImporter(object):
         # store this quote if it differs and we don't already have this security
         if (not snapshot or effectiveDate != snapshot.getDateInt()
                 or price != oldPrice) and security not in self.priceChanges:
-            priceFmt = self.lookupWindow.getCurrencyFormat(price)
-            self.display(
+            priceFmt = self.winCtl.getCurrencyFormat(price)
+            self.winCtl.display(
                 "FWIMP03: Change {} ({}) price from {} to {} "
                 "(<span class=\"{}\">{:+.2f}%</span>).".format(
                     security.getName(), holding.ticker,
@@ -116,7 +116,7 @@ class NbImporter(object):
             secAccount = MdUtil.getSubAccountByName(account, security.getName())
 
             if not secAccount:
-                self.display(
+                self.winCtl.display(
                     "FWIMP06: Unable to obtain Moneydance security "
                     "[{} ({})] in account {}.".format(
                         security.getName(), security.getTickerSymbol(),
@@ -125,7 +125,7 @@ class NbImporter(object):
                 balance = getCurrentBalance(secAccount)  # type: Decimal
 
                 if foundShares != balance:
-                    self.display(
+                    self.winCtl.display(
                         "FWIMP04: Found a different {} ({}) share balance "
                         "in account {}: have {}, found {}.".format(
                             secAccount.accountName, security.getTickerSymbol(),
@@ -141,11 +141,11 @@ class NbImporter(object):
     def obtainPrices(self, title, holdingsIter):
         # type: (str, Iterable[NbHolding]) -> None
         """Obtain price data from NetBenefits"""
-        self.display("FWIMP01: Obtaining price data from {}.".format(title))
+        self.winCtl.display("FWIMP01: Obtaining price data from {}.".format(title))
         account = self.root.getAccountByName(NbImporter.NB_ACCOUNT_NAME)  # type: Account
 
         if not account:
-            self.display("FWIMP05: Unable to obtain Moneydance investment account named {}.".format(
+            self.winCtl.display("FWIMP05: Unable to obtain Moneydance investment account named {}.".format(
                 NbImporter.NB_ACCOUNT_NAME))
         dates = set()  # type: Set[date]
 
@@ -159,11 +159,12 @@ class NbImporter(object):
                 self.verifyAccountBalance(account, hldn)
             dates.add(hldn.eDate)
         # end for
-        self.display("FWIMP09: Found effective date{} {}.".format(
-            "" if len(dates) == 1 else "s", ", ".join(dt.strftime("%a %b %d, %Y") for dt in dates)))
+        self.winCtl.display("FWIMP09: Found effective date{} {}.".format(
+            "" if len(dates) == 1 else "s",
+            ", ".join(dt.strftime("%a %b %d, %Y") for dt in dates)))
 
         if not self.isModified():
-            self.display("FWIMP08: No new price data found.")
+            self.winCtl.display("FWIMP08: No new price data found.")
     # end obtainPrices(str, Iterable[NbHolding])
 
 # end class NbImporter

@@ -7,8 +7,7 @@ from java.lang import System
 from typing import Optional
 
 from FwLookupWindow import FwLookupWindow
-from NbControl import NbControl
-from NbImporter import NbImporter
+from FwLookupWorker import FwLookupWorker
 
 
 class NetBenefits(object):
@@ -36,13 +35,10 @@ class NetBenefits(object):
         # type: (str) -> None
         System.err.println(NetBenefits.name + " invoked with uri [{}].".format(uri))
         self.showWindow()
-        nbCtrl = NbControl(self.lookupWindow)
 
-        if nbCtrl.getHoldingsDriver() \
-                and nbCtrl.navigateToHoldingsDetails():
-            importer = NbImporter(self.lookupWindow, self.fmContext.getCurrentAccountBook())
-            importer.obtainPrices(nbCtrl.getTitle(), nbCtrl.getHoldings())
-            self.lookupWindow.enableCommitButton(importer.isModified())
+        # SwingWorker instances are not reusable, so make a new one
+        worker = FwLookupWorker(self.lookupWindow, self.fmContext)
+        worker.execute()
     # end invoke(str)
 
     def handle_event(self, eventString):
@@ -64,9 +60,7 @@ class NetBenefits(object):
     def showWindow(self):
         # type: () -> None
         if self.lookupWindow:
-            self.lookupWindow.visible = True
-            self.lookupWindow.toFront()
-            self.lookupWindow.requestFocus()
+            self.lookupWindow.showInFront()
         else:
             self.lookupWindow = FwLookupWindow(NetBenefits.name)
             self.lookupWindow.visible = True

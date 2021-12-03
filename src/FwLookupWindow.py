@@ -17,7 +17,7 @@ class FwLookupWindow(JFrame):
 	def __init__(self, title):
 		# type: (str) -> None
 		super(FwLookupWindow, self).__init__(title)
-		self.commitChanges = None  # type: Optional[Callable[[], None]]
+		self.commitChanges = None  # type: Optional[Callable[[], int]]
 		self.isModified = None  # type: Optional[Callable[[], bool]]
 		self.releaseResources = None  # type: Optional[Callable[[], None]]
 
@@ -59,7 +59,9 @@ class FwLookupWindow(JFrame):
 		"""Invoked when Commit is selected."""
 
 		if self.commitChanges:
-			self.commitChanges()
+			numPricesSet = self.commitChanges()
+			self.addText("FWIMP07: Changed {} security price{}.".format(
+				numPricesSet, "" if numPricesSet == 1 else "s"))
 
 		if self.isModified:
 			self.enableCommitButton(self.isModified())
@@ -70,6 +72,16 @@ class FwLookupWindow(JFrame):
 		"""append HTML text to the output log text area"""
 		self.pnOutputLog.addText(text)
 	# end addText(str)
+
+	def showInFront(self):
+		# type: () -> None
+		"""Show our window in front of all others"""
+		self.setVisible(True)
+		self.setAlwaysOnTop(True)
+		# self.toFront()
+		self.setAlwaysOnTop(False)
+		self.requestFocus()
+	# end showInFront()
 
 	def clearText(self):
 		# type: () -> None
@@ -85,6 +97,7 @@ class FwLookupWindow(JFrame):
 
 	def getCurrencyFormat(self, amount):
 		# type: (Decimal) -> DecimalFormat
+		"""Get a currency number format with the number of fraction digits in 'amount'"""
 		amtScale = -amount.as_tuple().exponent
 		formatter = NumberFormat.getCurrencyInstance(self.getLocale())
 		formatter.minimumFractionDigits = amtScale

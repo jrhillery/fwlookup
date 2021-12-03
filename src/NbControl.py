@@ -1,7 +1,9 @@
 # Use Selenium web driver to launch and control a browser session
 from datetime import date, datetime
+from decimal import Decimal
 
 from java.lang import System
+from java.text import DecimalFormat
 from org.openqa.selenium import By, WebDriverException, WebElement
 from org.openqa.selenium.chrome import ChromeDriver, ChromeOptions
 from org.openqa.selenium.support.ui import ExpectedConditions, WebDriverWait
@@ -9,6 +11,7 @@ from typing import Iterator, List, Optional
 
 from FwLookupWindow import FwLookupWindow
 from NbHolding import NbHolding
+from WindowInterface import WindowInterface
 
 
 class NbControl(object):
@@ -16,12 +19,12 @@ class NbControl(object):
     CHROME_USER_DATA = "user-data-dir=C:/Users/John/AppData/Local/VSCode/Chrome/User Data"
     NB_LOG_IN = "https://nb.fidelity.com/public/nb/default/home"
 
-    def __init__(self, lookupWindow):
-        # type: (FwLookupWindow) -> None
+    def __init__(self, lookupWindow, winCtl):
+        # type: (FwLookupWindow, WindowInterface) -> None
         self.webDriver = None  # type: Optional[ChromeDriver]
         lookupWindow.releaseResources = self.releaseResources
-        self.lookupWindow = lookupWindow  # type: FwLookupWindow
-    # end __init__(FwLookupWindow)
+        self.winCtl = winCtl  # type: WindowInterface
+    # end __init__(FwLookupWindow, WindowInterface)
 
     def getHoldingsDriver(self):
         # type: () -> Optional[ChromeDriver]
@@ -49,7 +52,7 @@ class NbControl(object):
                 "#client-employer a[aria-Label='IBM 401(K) PLUS PLAN Summary.']")  # type: By
             WebDriverWait(self.webDriver, 35) \
                 .until(ExpectedConditions.elementToBeClickable(plusPlanLink))
-            self.showInFront()
+            self.winCtl.showInFront()
 
             # select 401(k) Plus Plan link
             ifXcptionMsg = "Unable to select 401(k) Plus Plan"
@@ -114,32 +117,41 @@ class NbControl(object):
 
     def reportError(self, txtMsg, xcption):
         # type: (str, WebDriverException) -> None
-        if self.lookupWindow:
-            self.lookupWindow.addText(txtMsg + ":<br/>" + xcption.toString())
-            self.showInFront()
+        self.winCtl.showInFront()
+        self.winCtl.display(txtMsg + ":<br/>" + xcption.toString())
         xcption.printStackTrace(System.err)
     # end reportError(str, WebDriverException)
-
-    def showInFront(self):
-        # type: () -> None
-        if self.lookupWindow:
-            self.lookupWindow.setAlwaysOnTop(True)
-            # self.lookupWindow.toFront()
-            # self.lookupWindow.repaint()
-            self.lookupWindow.setAlwaysOnTop(False)
-    # end showInFront()
 
 # end class NbControl
 
 
 if __name__ == "__main__":
-    lookupWin = FwLookupWindow("NB Control Title")
-    nbCtrl = NbControl(lookupWin)
-    lookupWin.visible = True
+    class Window(WindowInterface):
+        def __init__(self):
+            # type: () -> None
+            self.lookupWin = FwLookupWindow("NB Control Title")
+
+        def getCurrencyFormat(self, amount):
+            # type: (Decimal) -> DecimalFormat
+            return self.lookupWin.getCurrencyFormat(amount)
+
+        def display(self, *msgs):
+            # type: (*str) -> None
+            for msg in msgs:
+                self.lookupWin.addText(msg)
+
+        def showInFront(self):
+            # type: () -> None
+            self.lookupWin.showInFront()
+    # end class Window
+
+    win = Window()
+    nbCtrl = NbControl(win.lookupWin, win)
+    win.lookupWin.setVisible(True)
 
     if nbCtrl.getHoldingsDriver():
-        lookupWin.addText("Starting.")
+        win.display("Starting.")
 
         if nbCtrl.navigateToHoldingsDetails():
             for hldn in nbCtrl.getHoldings():
-                lookupWin.addText(hldn.__str__())
+                win.display(hldn.__str__())
