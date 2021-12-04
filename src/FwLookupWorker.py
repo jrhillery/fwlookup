@@ -30,12 +30,14 @@ class FwLookupWorker(SwingWorker, WindowInterface):
     def doInBackground(self):  # runs on worker thread
         # type: () -> bool
         """Long running routine to lookup Fidelity workplace account data"""
-        nbCtrl = NbControl(self.lookupWindow, self)
+        nbCtrl = NbControl(self)
+        self.lookupWindow.closeableResource = nbCtrl
 
         if nbCtrl.getHoldingsDriver() \
                 and nbCtrl.navigateToHoldingsDetails():
-            importer = NbImporter(self.lookupWindow, self, self.fmContext.getCurrentAccountBook())
-            importer.obtainPrices(nbCtrl.getTitle(), nbCtrl.getHoldings())
+            importer = NbImporter(self, self.fmContext.getCurrentAccountBook())
+            self.lookupWindow.staged = importer
+            importer.obtainPrices(nbCtrl.getHoldings())
 
             # return a boolean to get()
             return importer.isModified()

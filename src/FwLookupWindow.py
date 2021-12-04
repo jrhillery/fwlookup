@@ -4,12 +4,14 @@ from decimal import Decimal
 from com.leastlogic.swing.util import HTMLPane
 from java.awt import AWTEvent, Dimension
 from java.awt.event import ActionEvent, WindowEvent
-from java.lang import System
+from java.lang import AutoCloseable, System
 from java.text import DecimalFormat, NumberFormat
 from javax.swing import GroupLayout, JButton, JFrame, JPanel
 from javax.swing import JScrollPane, LayoutStyle, WindowConstants
 from javax.swing.border import EmptyBorder
-from typing import Callable, Optional
+from typing import Optional
+
+from StagedInterface import StagedInterface
 
 
 class FwLookupWindow(JFrame):
@@ -17,9 +19,8 @@ class FwLookupWindow(JFrame):
 	def __init__(self, title):
 		# type: (str) -> None
 		super(FwLookupWindow, self).__init__(title)
-		self.commitChanges = None  # type: Optional[Callable[[], int]]
-		self.isModified = None  # type: Optional[Callable[[], bool]]
-		self.releaseResources = None  # type: Optional[Callable[[], None]]
+		self.staged = None  # type: Optional[StagedInterface]
+		self.closeableResource = None  # type: Optional[AutoCloseable]
 
 		# Initialize the swing components.
 		self.defaultCloseOperation = WindowConstants.DO_NOTHING_ON_CLOSE
@@ -58,13 +59,11 @@ class FwLookupWindow(JFrame):
 		# type: (ActionEvent) -> None
 		"""Invoked when Commit is selected."""
 
-		if self.commitChanges:
-			numPricesSet = self.commitChanges()
+		if self.staged:
+			numPricesSet = self.staged.commitChanges()
 			self.addText("FWIMP07: Changed {} security price{}.".format(
 				numPricesSet, "" if numPricesSet == 1 else "s"))
-
-		if self.isModified:
-			self.enableCommitButton(self.isModified())
+			self.enableCommitButton(self.staged.isModified())
 	# end pressCommit(ActionEvent)
 
 	def addText(self, text):
@@ -117,9 +116,9 @@ class FwLookupWindow(JFrame):
 	def closeWindow(self):
 		self.goAway()
 
-		if self.releaseResources:
+		if self.closeableResource:
 			# Release any resources we acquired.
-			self.releaseResources()
+			self.closeableResource.close()
 	# end closeWindow()
 
 	def goAway(self):

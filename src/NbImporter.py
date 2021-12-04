@@ -9,9 +9,9 @@ from com.leastlogic.moneydance.util import SnapshotList, MdUtil
 from com.leastlogic.swing.util import HTMLPane
 from typing import Dict, Iterable, Set
 
-from FwLookupWindow import FwLookupWindow
 from NbHolding import NbHolding
 from SecurityHandler import SecurityHandler
+from StagedInterface import StagedInterface
 from WindowInterface import WindowInterface
 
 
@@ -36,23 +36,20 @@ def convRateToPrice(rate, exp):
 # end convRateToPrice(float, Decimal)
 
 
-class NbImporter(object):
+class NbImporter(StagedInterface):
     NB_ACCOUNT_NAME = "IBM 401k"
 
-    def __init__(self, lookupWindow, winCtl, accountBook):
-        # type: (FwLookupWindow, WindowInterface, AccountBook) -> None
+    def __init__(self, winCtl, accountBook):
+        # type: (WindowInterface, AccountBook) -> None
         self.priceChanges = {}  # type: Dict[CurrencyType, SecurityHandler]
         self.numPricesSet = 0  # type: int
-        lookupWindow.commitChanges = self.commitChanges
-        lookupWindow.isModified = self.isModified
         self.winCtl = winCtl  # type: WindowInterface
         self.root = accountBook.getRootAccount()  # type: Account
         self.securities = accountBook.getCurrencies()  # type: CurrencyTable
-    # end __init__(FwLookupWindow, WindowInterface, AccountBook)
+    # end __init__(WindowInterface, AccountBook)
 
     def commitChanges(self):
         # type: () -> int
-        """Commit any changes to Moneydance."""
         for sHandler in self.priceChanges.values():
             sHandler.applyUpdate()
 
@@ -64,8 +61,8 @@ class NbImporter(object):
 
     def isModified(self):
         # type: () -> bool
-        """Return True when we have uncommitted changes in memory"""
         return bool(self.priceChanges)
+    # end isModified()
 
     def verifyAccountBalance(self, account, holding):
         # type: (Account, NbHolding) -> None
@@ -138,10 +135,9 @@ class NbImporter(object):
         self.numPricesSet = 0
     # end forgetChanges()
 
-    def obtainPrices(self, title, holdingsIter):
-        # type: (str, Iterable[NbHolding]) -> None
+    def obtainPrices(self, holdingsIter):
+        # type: (Iterable[NbHolding]) -> None
         """Obtain price data from NetBenefits"""
-        self.winCtl.display("FWIMP01: Obtaining price data from {}.".format(title))
         account = self.root.getAccountByName(NbImporter.NB_ACCOUNT_NAME)  # type: Account
 
         if not account:
@@ -165,6 +161,6 @@ class NbImporter(object):
 
         if not self.isModified():
             self.winCtl.display("FWIMP08: No new price data found.")
-    # end obtainPrices(str, Iterable[NbHolding])
+    # end obtainPrices(Iterable[NbHolding])
 
 # end class NbImporter

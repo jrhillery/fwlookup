@@ -2,7 +2,7 @@
 from datetime import date, datetime
 from decimal import Decimal
 
-from java.lang import System
+from java.lang import AutoCloseable, System
 from java.text import DecimalFormat
 from org.openqa.selenium import By, WebDriverException, WebElement
 from org.openqa.selenium.chrome import ChromeDriver, ChromeOptions
@@ -14,17 +14,16 @@ from NbHolding import NbHolding
 from WindowInterface import WindowInterface
 
 
-class NbControl(object):
+class NbControl(AutoCloseable):
     """Controls browsing NetBenefits web pages"""
     CHROME_USER_DATA = "user-data-dir=C:/Users/John/AppData/Local/VSCode/Chrome/User Data"
     NB_LOG_IN = "https://nb.fidelity.com/public/nb/default/home"
 
-    def __init__(self, lookupWindow, winCtl):
-        # type: (FwLookupWindow, WindowInterface) -> None
+    def __init__(self, winCtl):
+        # type: (WindowInterface) -> None
         self.webDriver = None  # type: Optional[ChromeDriver]
-        lookupWindow.releaseResources = self.releaseResources
         self.winCtl = winCtl  # type: WindowInterface
-    # end __init__(FwLookupWindow, WindowInterface)
+    # end __init__(WindowInterface)
 
     def getHoldingsDriver(self):
         # type: () -> Optional[ChromeDriver]
@@ -64,6 +63,8 @@ class NbControl(object):
             link = WebDriverWait(self.webDriver, 8) \
                 .until(ExpectedConditions.elementToBeClickable(By.cssSelector(
                     "#holdings-section .show-details-link")))
+            self.winCtl.display("FWIMP01: Obtaining price data from {}.".format(
+                self.webDriver.getTitle()))
             self.webDriver.executeScript("arguments[0].click();", link)
 
             return True
@@ -104,16 +105,12 @@ class NbControl(object):
             self.reportError(ifXcptionMsg, e)
     # end getHoldings()
 
-    def getTitle(self):
-        # type: () -> str
-        return self.webDriver.getTitle()
-
-    def releaseResources(self):
+    def close(self):
         # type: () -> None
         """Release any resources we acquired."""
         if self.webDriver:
             self.webDriver.quit()
-    # end releaseResources()
+    # end close()
 
     def reportError(self, txtMsg, xcption):
         # type: (str, WebDriverException) -> None
@@ -146,7 +143,8 @@ if __name__ == "__main__":
     # end class Window
 
     win = Window()
-    nbCtrl = NbControl(win.lookupWin, win)
+    nbCtrl = NbControl(win)
+    win.lookupWin.closeableResource = nbCtrl
     win.lookupWin.setVisible(True)
 
     if nbCtrl.getHoldingsDriver():
