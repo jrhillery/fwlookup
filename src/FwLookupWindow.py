@@ -53,6 +53,8 @@ class FwLookupWindow(JFrame):
 					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 271, 0x7fff))
 		)
 		contentPane.layout = gl_contentPane
+		self.setIconImage(HTMLPane.readResourceImage("/flat-funnel-32.png", self.getClass()))
+		self.setVisible(True)
 	# end __init__(str)
 
 	def pressCommit(self, event):
@@ -136,7 +138,6 @@ class FwLookupWindow(JFrame):
 
 if __name__ == "__main__":
 	frame = FwLookupWindow("FW Lookup Title")  # type: FwLookupWindow
-	frame.visible = True
 	amt = Decimal("123.50")
 	fmt = frame.getCurrencyFormat(amt)
 	frame.addText(fmt.format(amt))

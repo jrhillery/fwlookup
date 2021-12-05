@@ -2,7 +2,7 @@
 from decimal import Decimal
 
 from com.moneydance.apps.md.controller import FeatureModuleContext
-from java.lang import Runnable
+from java.lang import AutoCloseable, Runnable, System, Throwable
 from java.text import DecimalFormat
 from javax.swing import SwingUtilities, SwingWorker
 from typing import List
@@ -22,27 +22,40 @@ class FwLookupWorker(SwingWorker, WindowInterface):
         self.fmContext = fmContext  # type: FeatureModuleContext
     # end __init__(FwLookupWindow, FeatureModuleContext)
 
+    def registerClosableResource(self, closable):
+        # type: (AutoCloseable) -> None
+        self.lookupWindow.closeableResource = closable
+    # end registerClosableResource(AutoCloseable)
+
     def getCurrencyFormat(self, amount):
         # type: (Decimal) -> DecimalFormat
         return self.lookupWindow.getCurrencyFormat(amount)
     # end getCurrencyFormat(Decimal)
 
+    def handleException(self, e):
+        # type: (Throwable) -> None
+        self.display(e.toString())
+        e.printStackTrace(System.err)
+    # end handleException(Throwable)
+
     def doInBackground(self):  # runs on worker thread
         # type: () -> bool
         """Long running routine to lookup Fidelity workplace account data"""
-        nbCtrl = NbControl(self)
-        self.lookupWindow.closeableResource = nbCtrl
+        try:
+            nbCtrl = NbControl(self)
 
-        if nbCtrl.getHoldingsDriver() \
-                and nbCtrl.navigateToHoldingsDetails():
-            importer = NbImporter(self, self.fmContext.getCurrentAccountBook())
-            self.lookupWindow.staged = importer
-            importer.obtainPrices(nbCtrl.getHoldings())
+            if nbCtrl.getHoldingsDriver() \
+                    and nbCtrl.navigateToHoldingsDetails():
+                importer = NbImporter(self, self.fmContext.getCurrentAccountBook())
+                self.lookupWindow.staged = importer
+                importer.obtainPrices(nbCtrl.getHoldings())
 
-            # return a boolean to get()
-            return importer.isModified()
-        else:
-            return False
+                # return a boolean to get()
+                return importer.isModified()
+        except Throwable as e:
+            self.handleException(e)
+
+        return False
     # end doInBackground()
 
     def done(self):  # runs on event dispatch thread

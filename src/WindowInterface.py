@@ -1,12 +1,20 @@
 from abc import ABCMeta, abstractmethod
 from decimal import Decimal
 
+from java.lang import AutoCloseable
 from java.text import DecimalFormat
 
 
 class WindowInterface(object):
     """An interface to control our Swing window"""
     __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def registerClosableResource(self, closable):
+        # type: (AutoCloseable) -> None
+        """Register something that needs cleaning up during window close"""
+        pass
+    # end registerClosableResource(AutoCloseable)
 
     @abstractmethod
     def getCurrencyFormat(self, amount):
