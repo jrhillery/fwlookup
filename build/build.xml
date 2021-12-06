@@ -61,7 +61,7 @@ http://jakarta.apache.org/ant/index.html
   </target>
 
   <target name="clean">
-    <delete deleteonexit="true">
+    <delete deleteonexit="true" verbose="true">
       <fileset dir="${build}" includes="*.mxt"/>
     </delete>
   </target>

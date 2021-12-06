@@ -53,7 +53,8 @@ class FwLookupWindow(JFrame):
 					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 271, 0x7fff))
 		)
 		contentPane.layout = gl_contentPane
-		self.setIconImage(HTMLPane.readResourceImage("/flat-funnel-32.png", self.getClass()))
+		self.setIconImage(HTMLPane.readResourceImage(
+			"/flat-funnel-32.png", self.pnOutputLog.getClass()))
 		self.setVisible(True)
 	# end __init__(str)
 
@@ -81,7 +82,7 @@ class FwLookupWindow(JFrame):
 		self.setAlwaysOnTop(True)
 		# self.toFront()
 		self.setAlwaysOnTop(False)
-		self.requestFocus()
+		# self.requestFocus()
 	# end showInFront()
 
 	def clearText(self):
