@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/fwlookup.iml" filepath="$PROJECT_DIR$/fwlookup.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/fwlookup.iml" filepath="$PROJECT_DIR$/.idea/fwlookup.iml" />
     </modules>
   </component>
 </project>

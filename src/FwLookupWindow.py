@@ -141,8 +141,8 @@ if __name__ == "__main__":
     frame = FwLookupWindow("FW Lookup Title")  # type: FwLookupWindow
     amt = Decimal("14.00")
     fmt = frame.getCurrencyFormat(amt)
-    frame.addText("NWSYNC10: Change Eaton Vance Equity Inc (ETY) price for today from "
-                  + fmt.format(amt) + " to $14.23 (<span class='incrs'>+1.64%</span>).")
-    frame.addText("NWSYNC10: Change IBM Common Stock (IBM) price for today "
-                  "from $119.00 to $118.84 (<span class='decrs'>-0.13%</span>).")
+    frame.addText("Change Eaton Vance Equity Inc (ETY) price for today from {} to "
+                  "$14.23 (<span class='incrs'>+1.64%</span>).".format(fmt.format(amt)))
+    frame.addText("Change IBM Common Stock (IBM) price for today from "
+                  "$119.00 to $118.84 (<span class='decrs'>-0.13%</span>).")
     frame.enableCommitButton(True)

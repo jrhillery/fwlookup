@@ -50,13 +50,12 @@ class NbControl(AutoCloseable):
             ifXcptionMsg = "Timed out waiting for log-in"
             plusPlanLink = By.cssSelector(
                 "#client-employer a[aria-Label='IBM 401(K) PLUS PLAN Summary.']")  # type: By
-            WebDriverWait(self.webDriver, 35) \
+            link = WebDriverWait(self.webDriver, 35) \
                 .until(ExpectedConditions.elementToBeClickable(plusPlanLink))
             self.winCtl.showInFront()
 
             # select 401(k) Plus Plan link
             ifXcptionMsg = "Unable to select 401(k) Plus Plan"
-            link = self.webDriver.findElement(plusPlanLink)
             self.webDriver.executeScript("arguments[0].click();", link)
 
             # render holdings details
@@ -85,7 +84,7 @@ class NbControl(AutoCloseable):
 
             # lookup data for holdings
             ifXcptionMsg = "Unable to find holdings table"
-            hTbl = self.webDriver.findElement(By.id("holdingsTable"))
+            hTbl = self.webDriver.findElement(By.id("holdingsTable"))  # type: WebElement
             tHdrs = [hdr.text for hdr in hTbl.findElements(By.cssSelector(
                 "thead > tr > th"))]  # type: List[str]
             bodyRows = iter(hTbl.findElements(By.cssSelector(
