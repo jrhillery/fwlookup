@@ -18,6 +18,7 @@ class NbControl(AutoCloseable):
     """Controls browsing NetBenefits web pages"""
     CHROME_USER_DATA = "user-data-dir=C:/Users/John/AppData/Local/VSCode/Chrome/User Data"
     NB_LOG_IN = "https://nb.fidelity.com/public/nb/default/home"
+    # CALCULATOR_PAGE = "http://www.calculator.net"  # By.linkText("Math Calculators")
 
     def __init__(self, winCtl):
         # type: (WindowInterface) -> None
