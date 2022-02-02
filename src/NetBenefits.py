@@ -6,7 +6,7 @@ from com.moneydance.apps.md.controller import FeatureModule, FeatureModuleContex
 from java.lang import System, Throwable
 from typing import Optional
 
-from FwLookupWindow import FwLookupWindow
+from FwLookupConsole import FwLookupConsole
 from FwLookupWorker import FwLookupWorker
 
 
@@ -15,7 +15,7 @@ class NetBenefits(object):
 
     def __init__(self):
         # type: () -> None
-        self.lookupWindow = None  # type: Optional[FwLookupWindow]
+        self.lookupConsole = None  # type: Optional[FwLookupConsole]
         self.fmContext = None  # type: Optional[FeatureModuleContext]
     # end __init__()
 
@@ -38,7 +38,7 @@ class NetBenefits(object):
             self.showWindow()
 
             # SwingWorker instances are not reusable, so make a new one
-            worker = FwLookupWorker(self.lookupWindow, self.fmContext)
+            worker = FwLookupWorker(self.lookupConsole, self.fmContext)
             worker.execute()
         except Throwable as e:
             self.handleException(e)
@@ -50,16 +50,16 @@ class NetBenefits(object):
 
     def handleException(self, e):
         # type: (Throwable) -> None
-        self.lookupWindow.addText(e.toString())
-        self.lookupWindow.enableCommitButton(False)
+        self.lookupConsole.addText(e.toString())
+        self.lookupConsole.enableCommitButton(False)
         e.printStackTrace(System.err)
     # end handleException(Throwable)
 
     def unload(self):
         # type: () -> None
-        if self.lookupWindow:
-            self.lookupWindow.closeWindow()
-            self.lookupWindow = None
+        if self.lookupConsole:
+            self.lookupConsole.closeWindow()
+            self.lookupConsole = None
         self.fmContext = None
     # end unload()
 
@@ -69,11 +69,11 @@ class NetBenefits(object):
 
     def showWindow(self):
         # type: () -> None
-        if self.lookupWindow:
-            self.lookupWindow.clearText()
-            self.lookupWindow.showInFront()
+        if self.lookupConsole:
+            self.lookupConsole.clearText()
+            self.lookupConsole.showInFront()
         else:
-            self.lookupWindow = FwLookupWindow(NetBenefits.name)
+            self.lookupConsole = FwLookupConsole(NetBenefits.name)
     # end showWindow()
 
 # end class NetBenefits

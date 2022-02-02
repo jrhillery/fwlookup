@@ -7,7 +7,7 @@ from java.text import DecimalFormat
 from javax.swing import SwingUtilities, SwingWorker
 from typing import List
 
-from FwLookupWindow import FwLookupWindow
+from FwLookupConsole import FwLookupConsole
 from NbControl import NbControl
 from NbImporter import NbImporter
 from WindowInterface import WindowInterface
@@ -15,21 +15,21 @@ from WindowInterface import WindowInterface
 
 class FwLookupWorker(SwingWorker, WindowInterface):
 
-    def __init__(self, lookupWindow, fmContext):
-        # type: (FwLookupWindow, FeatureModuleContext) -> None
+    def __init__(self, lookupConsole, fmContext):
+        # type: (FwLookupConsole, FeatureModuleContext) -> None
         super(FwLookupWorker, self).__init__()
-        self.lookupWindow = lookupWindow  # type: FwLookupWindow
+        self.lookupConsole = lookupConsole  # type: FwLookupConsole
         self.fmContext = fmContext  # type: FeatureModuleContext
-    # end __init__(FwLookupWindow, FeatureModuleContext)
+    # end __init__(FwLookupConsole, FeatureModuleContext)
 
     def registerClosableResource(self, closable):
         # type: (AutoCloseable) -> None
-        self.lookupWindow.closeableResource = closable
+        self.lookupConsole.closeableResource = closable
     # end registerClosableResource(AutoCloseable)
 
     def getCurrencyFormat(self, amount):
         # type: (Decimal) -> DecimalFormat
-        return self.lookupWindow.getCurrencyFormat(amount)
+        return self.lookupConsole.getCurrencyFormat(amount)
     # end getCurrencyFormat(Decimal)
 
     def handleException(self, e):
@@ -40,14 +40,14 @@ class FwLookupWorker(SwingWorker, WindowInterface):
 
     def doInBackground(self):  # runs on worker thread
         # type: () -> bool
-        """Long running routine to lookup Fidelity workplace account data"""
+        """Long-running routine to lookup Fidelity workplace account data"""
         try:
             nbCtrl = NbControl(self)
 
             if nbCtrl.getHoldingsDriver() \
                     and nbCtrl.navigateToHoldingsDetails():
                 importer = NbImporter(self, self.fmContext.getCurrentAccountBook())
-                self.lookupWindow.staged = importer
+                self.lookupConsole.staged = importer
                 importer.obtainPrices(nbCtrl.getHoldings())
 
                 # return a boolean to get()
@@ -61,7 +61,7 @@ class FwLookupWorker(SwingWorker, WindowInterface):
     def done(self):  # runs on event dispatch thread
         # type: () -> None
         # enable the commit button if we have changes
-        self.lookupWindow.enableCommitButton(self.get())
+        self.lookupConsole.enableCommitButton(self.get())
     # end done()
 
     def display(self, *msgs):  # runs on worker thread
@@ -72,24 +72,24 @@ class FwLookupWorker(SwingWorker, WindowInterface):
     def process(self, msgs):  # runs on event dispatch thread
         # type: (List[str]) -> None
         for msg in msgs:
-            self.lookupWindow.addText(msg)
+            self.lookupConsole.addText(msg)
     # end process(List[str])
 
     def showInFront(self):  # runs on worker thread
         # type: () -> None
-        SwingUtilities.invokeLater(ShowInFront(self.lookupWindow))
+        SwingUtilities.invokeLater(ShowInFront(self.lookupConsole))
     # end showInFront()
 
 # end class FwLookupWorker
 
 
 class ShowInFront(Runnable):
-    def __init__(self, lookupWindow):
-        # type: (FwLookupWindow) -> None
-        self.lookupWindow = lookupWindow
+    def __init__(self, lookupConsole):
+        # type: (FwLookupConsole) -> None
+        self.lookupConsole = lookupConsole
 
     def run(self):  # runs on event dispatch thread
         # type: () -> None
-        self.lookupWindow.showInFront()
+        self.lookupConsole.showInFront()
 
 # end class ShowInFront

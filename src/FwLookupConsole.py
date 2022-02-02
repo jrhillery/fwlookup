@@ -14,11 +14,11 @@ from typing import Optional
 from StagedInterface import StagedInterface
 
 
-class FwLookupWindow(JFrame):
+class FwLookupConsole(JFrame):
 
     def __init__(self, title):
         # type: (str) -> None
-        super(FwLookupWindow, self).__init__(title)
+        super(FwLookupConsole, self).__init__(title)
         self.staged = None  # type: Optional[StagedInterface]
         self.closeableResource = None  # type: Optional[AutoCloseable]
 
@@ -71,7 +71,7 @@ class FwLookupWindow(JFrame):
 
     def addText(self, text):
         # type: (str) -> None
-        """append HTML text to the output log text area"""
+        """append HTML-text to the output log text area"""
         self.pnOutputLog.addText(text)
     # end addText(str)
 
@@ -113,7 +113,7 @@ class FwLookupWindow(JFrame):
         if event.getID() == WindowEvent.WINDOW_CLOSING:
             self.closeWindow()
         else:
-            super(FwLookupWindow, self).processEvent(event)
+            super(FwLookupConsole, self).processEvent(event)
     # end processEvent(AWTEvent)
 
     def closeWindow(self):
@@ -134,11 +134,11 @@ class FwLookupWindow(JFrame):
         self.dispose()
     # end goAway()
 
-# end class FwLookupWindow
+# end class FwLookupConsole
 
 
 if __name__ == "__main__":
-    frame = FwLookupWindow("FW Lookup Title")  # type: FwLookupWindow
+    frame = FwLookupConsole("FW Lookup Title")  # type: FwLookupConsole
     amt = Decimal("14.00")
     fmt = frame.getCurrencyFormat(amt)
     frame.addText("Change Eaton Vance Equity Inc (ETY) price for today from {} to "

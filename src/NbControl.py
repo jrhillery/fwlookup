@@ -9,7 +9,7 @@ from org.openqa.selenium.chrome import ChromeDriver, ChromeOptions
 from org.openqa.selenium.support.ui import ExpectedConditions, WebDriverWait
 from typing import Iterator, List, Optional
 
-from FwLookupWindow import FwLookupWindow
+from FwLookupConsole import FwLookupConsole
 from NbHolding import NbHolding
 from WindowInterface import WindowInterface
 
@@ -124,30 +124,30 @@ class NbControl(AutoCloseable):
 
 
 if __name__ == "__main__":
-    class TestWindow(WindowInterface):
+    class TestConsole(WindowInterface):
         def __init__(self):
             # type: () -> None
-            self.lookupWin = FwLookupWindow("NB Control Title")
+            self.lookupConsole = FwLookupConsole("NB Control Title")
 
         def registerClosableResource(self, closable):
             # type: (AutoCloseable) -> None
-            self.lookupWin.closeableResource = closable
+            self.lookupConsole.closeableResource = closable
 
         def getCurrencyFormat(self, amount):
             # type: (Decimal) -> DecimalFormat
-            return self.lookupWin.getCurrencyFormat(amount)
+            return self.lookupConsole.getCurrencyFormat(amount)
 
         def display(self, *msgs):
             # type: (*str) -> None
             for msg in msgs:
-                self.lookupWin.addText(msg)
+                self.lookupConsole.addText(msg)
 
         def showInFront(self):
             # type: () -> None
-            self.lookupWin.showInFront()
-    # end class TestWindow
+            self.lookupConsole.showInFront()
+    # end class TestConsole
 
-    win = TestWindow()
+    win = TestConsole()
     nbCtrl = NbControl(win)
 
     if nbCtrl.getHoldingsDriver():

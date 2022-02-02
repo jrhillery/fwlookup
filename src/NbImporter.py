@@ -90,7 +90,7 @@ class NbImporter(StagedInterface):
         snapshot = ssList.getSnapshotForDate(effectiveDate)  # type: CurrencySnapshot
         oldPrice = convRateToPrice(snapshot.getRate(), price) if snapshot else Decimal("1")
 
-        # store this quote if it differs and we don't already have this security
+        # store this quote if it differs, and we don't already have this security
         if (not snapshot or effectiveDate != snapshot.getDateInt()
                 or price != oldPrice) and security not in self.priceChanges:
             priceFmt = self.winCtl.getCurrencyFormat(price)
