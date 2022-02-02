@@ -2,7 +2,7 @@
 from decimal import Decimal
 
 from com.moneydance.apps.md.controller import FeatureModuleContext
-from java.lang import AutoCloseable, Runnable, System, Throwable
+from java.lang import Runnable, System, Throwable
 from java.text import DecimalFormat
 from javax.swing import SwingUtilities, SwingWorker
 from typing import List
@@ -20,12 +20,9 @@ class FwLookupWorker(SwingWorker, WindowInterface):
         super(FwLookupWorker, self).__init__()
         self.lookupConsole = lookupConsole  # type: FwLookupConsole
         self.fmContext = fmContext  # type: FeatureModuleContext
+        self.nbCtrl = NbControl(self)
+        lookupConsole.closeableResource = self.nbCtrl
     # end __init__(FwLookupConsole, FeatureModuleContext)
-
-    def registerClosableResource(self, closable):
-        # type: (AutoCloseable) -> None
-        self.lookupConsole.closeableResource = closable
-    # end registerClosableResource(AutoCloseable)
 
     def getCurrencyFormat(self, amount):
         # type: (Decimal) -> DecimalFormat
@@ -42,13 +39,11 @@ class FwLookupWorker(SwingWorker, WindowInterface):
         # type: () -> bool
         """Long-running routine to lookup Fidelity workplace account data"""
         try:
-            nbCtrl = NbControl(self)
-
-            if nbCtrl.getHoldingsDriver() \
-                    and nbCtrl.navigateToHoldingsDetails():
+            if self.nbCtrl.getHoldingsDriver() \
+                    and self.nbCtrl.navigateToHoldingsDetails():
                 importer = NbImporter(self, self.fmContext.getCurrentAccountBook())
                 self.lookupConsole.staged = importer
-                importer.obtainPrices(nbCtrl.getHoldings())
+                importer.obtainPrices(self.nbCtrl.getHoldings())
 
                 # return a boolean to get()
                 return importer.isModified()

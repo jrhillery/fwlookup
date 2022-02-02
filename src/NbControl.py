@@ -24,7 +24,6 @@ class NbControl(AutoCloseable):
         # type: (WindowInterface) -> None
         self.webDriver = None  # type: Optional[ChromeDriver]
         self.winCtl = winCtl  # type: WindowInterface
-        winCtl.registerClosableResource(self)
     # end __init__(WindowInterface)
 
     def getHoldingsDriver(self):
@@ -129,10 +128,6 @@ if __name__ == "__main__":
             # type: () -> None
             self.lookupConsole = FwLookupConsole("NB Control Title")
 
-        def registerClosableResource(self, closable):
-            # type: (AutoCloseable) -> None
-            self.lookupConsole.closeableResource = closable
-
         def getCurrencyFormat(self, amount):
             # type: (Decimal) -> DecimalFormat
             return self.lookupConsole.getCurrencyFormat(amount)
@@ -149,6 +144,7 @@ if __name__ == "__main__":
 
     win = TestConsole()
     nbCtrl = NbControl(win)
+    win.lookupConsole.closeableResource = nbCtrl
 
     if nbCtrl.getHoldingsDriver():
         win.display("Starting.")
