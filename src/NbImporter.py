@@ -49,14 +49,15 @@ class NbImporter(StagedInterface):
     # end __init__(WindowInterface, AccountBook)
 
     def commitChanges(self):
-        # type: () -> int
+        # type: () -> str
         for sHandler in self.priceChanges.values():
             sHandler.applyUpdate()
 
         numPricesSet = self.numPricesSet
         self.forgetChanges()
 
-        return numPricesSet
+        return "FWIMP07: Changed {} security price{}.".format(
+            numPricesSet, "" if numPricesSet == 1 else "s")
     # end commitChanges()
 
     def isModified(self):

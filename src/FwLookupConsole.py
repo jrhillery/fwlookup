@@ -63,9 +63,10 @@ class FwLookupConsole(JFrame):
         """Invoked when Commit is selected."""
 
         if self.staged:
-            numPricesSet = self.staged.commitChanges()
-            self.addText("FWIMP07: Changed {} security price{}.".format(
-                numPricesSet, "" if numPricesSet == 1 else "s"))
+            changeSummary = self.staged.commitChanges()
+
+            if changeSummary:
+                self.addText(changeSummary)
             self.enableCommitButton(self.staged.isModified())
     # end pressCommit(ActionEvent)
 
@@ -111,18 +112,10 @@ class FwLookupConsole(JFrame):
         # type: (AWTEvent) -> None
         """Process events on this window."""
         if event.getID() == WindowEvent.WINDOW_CLOSING:
-            self.closeWindow()
+            self.goAway()
         else:
             super(FwLookupConsole, self).processEvent(event)
     # end processEvent(AWTEvent)
-
-    def closeWindow(self):
-        self.goAway()
-
-        if self.closeableResource:
-            # Release any resources we acquired.
-            self.closeableResource.close()
-    # end closeWindow()
 
     def goAway(self):
         # type: () -> None
@@ -132,6 +125,10 @@ class FwLookupConsole(JFrame):
             self.getTitle(), winSize.width, winSize.height))
         self.setVisible(False)
         self.dispose()
+
+        if self.closeableResource:
+            # Release any resources we acquired.
+            self.closeableResource.close()
     # end goAway()
 
 # end class FwLookupConsole

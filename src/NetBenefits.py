@@ -58,7 +58,7 @@ class NetBenefits(object):
     def unload(self):
         # type: () -> None
         if self.lookupConsole:
-            self.lookupConsole.closeWindow()
+            self.lookupConsole.goAway()
             self.lookupConsole = None
         self.fmContext = None
     # end unload()

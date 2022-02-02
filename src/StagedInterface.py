@@ -7,7 +7,7 @@ class StagedInterface(object):
 
     @abstractmethod
     def commitChanges(self):
-        # type: () -> int
+        # type: () -> str
         """Commit any changes to Moneydance and return the number of changes set"""
         pass
     # end commitChanges()
