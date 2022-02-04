@@ -2,7 +2,7 @@
 from decimal import Decimal
 
 from com.moneydance.apps.md.controller import FeatureModuleContext
-from java.lang import Runnable, System, Throwable
+from java.lang import AutoCloseable, Runnable, System, Throwable
 from java.text import DecimalFormat
 from javax.swing import SwingUtilities, SwingWorker
 from typing import List
@@ -13,7 +13,7 @@ from NbImporter import NbImporter
 from WindowInterface import WindowInterface
 
 
-class FwLookupWorker(SwingWorker, WindowInterface):
+class FwLookupWorker(SwingWorker, WindowInterface, AutoCloseable):
 
     def __init__(self, lookupConsole, fmContext):
         # type: (FwLookupConsole, FeatureModuleContext) -> None
@@ -21,7 +21,7 @@ class FwLookupWorker(SwingWorker, WindowInterface):
         self.lookupConsole = lookupConsole  # type: FwLookupConsole
         self.fmContext = fmContext  # type: FeatureModuleContext
         self.nbCtrl = NbControl(self)
-        lookupConsole.closeableResource = self.nbCtrl
+        lookupConsole.closeableResource = self
     # end __init__(FwLookupConsole, FeatureModuleContext)
 
     def getCurrencyFormat(self, amount):
@@ -74,6 +74,12 @@ class FwLookupWorker(SwingWorker, WindowInterface):
         # type: () -> None
         SwingUtilities.invokeLater(ShowInFront(self.lookupConsole))
     # end showInFront()
+
+    def close(self):
+        # type: () -> None
+        with self.nbCtrl:  # make sure we close nbCtrl
+            pass
+    # end close()
 
 # end class FwLookupWorker
 

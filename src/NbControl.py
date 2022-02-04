@@ -1,6 +1,7 @@
 # Use Selenium web driver to launch and control a browser session
 from datetime import date, datetime
 from decimal import Decimal
+from types import TracebackType
 
 from java.lang import AutoCloseable, System
 from java.text import DecimalFormat
@@ -14,7 +15,7 @@ from NbHolding import NbHolding
 from WindowInterface import WindowInterface
 
 
-class NbControl(AutoCloseable):
+class NbControl(object):
     """Controls browsing NetBenefits web pages"""
     CHROME_USER_DATA = "user-data-dir=C:/Users/John/AppData/Local/VSCode/Chrome/User Data"
     NB_LOG_IN = "https://nb.fidelity.com/public/nb/default/home"
@@ -50,7 +51,7 @@ class NbControl(AutoCloseable):
             ifXcptionMsg = "Timed out waiting for log-in"
             plusPlanLink = By.cssSelector(
                 "#client-employer a[aria-Label='IBM 401(K) PLUS PLAN Summary.']")  # type: By
-            link = WebDriverWait(self.webDriver, 35) \
+            link = WebDriverWait(self.webDriver, 55) \
                 .until(ExpectedConditions.elementToBeClickable(plusPlanLink))
             self.winCtl.showInFront()
 
@@ -105,12 +106,20 @@ class NbControl(AutoCloseable):
             self.reportError(ifXcptionMsg, e)
     # end getHoldings()
 
-    def close(self):
-        # type: () -> None
+    def __enter__(self):
+        # type: () -> NbControl
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        # type: (Optional[type(BaseException)], Optional[BaseException], Optional[TracebackType]) -> Optional[bool]
         """Release any resources we acquired."""
         if self.webDriver:
+            System.err.println("Quitting web driver {}.".format(
+                self.webDriver.getWindowHandle()))
             self.webDriver.quit()
-    # end close()
+
+        return None
+    # end __exit__(Type[BaseException] | None, BaseException | None, TracebackType | None)
 
     def reportError(self, txtMsg, xcption):
         # type: (str, WebDriverException) -> None
@@ -123,10 +132,11 @@ class NbControl(AutoCloseable):
 
 
 if __name__ == "__main__":
-    class TestConsole(WindowInterface):
+    class TestConsole(WindowInterface, AutoCloseable):
         def __init__(self):
-            # type: () -> None
+            self.nbCtrl = None  # type: Optional[NbControl]
             self.lookupConsole = FwLookupConsole("NB Control Title")
+            self.lookupConsole.closeableResource = self
 
         def getCurrencyFormat(self, amount):
             # type: (Decimal) -> DecimalFormat
@@ -138,17 +148,19 @@ if __name__ == "__main__":
                 self.lookupConsole.addText(msg)
 
         def showInFront(self):
-            # type: () -> None
             self.lookupConsole.showInFront()
+
+        def close(self):
+            with self.nbCtrl:  # make sure we close nbCtrl
+                pass
     # end class TestConsole
 
     win = TestConsole()
-    nbCtrl = NbControl(win)
-    win.lookupConsole.closeableResource = nbCtrl
+    win.nbCtrl = NbControl(win)
 
-    if nbCtrl.getHoldingsDriver():
+    if win.nbCtrl.getHoldingsDriver():
         win.display("Starting.")
 
-        if nbCtrl.navigateToHoldingsDetails():
-            for hldn in nbCtrl.getHoldings():
+        if win.nbCtrl.navigateToHoldingsDetails():
+            for hldn in win.nbCtrl.getHoldings():
                 win.display(hldn.__str__())
