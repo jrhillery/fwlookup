@@ -47,6 +47,9 @@ class NbControl(object):
             # open NetBenefits log-in page
             self.webDriver.get(NbControl.NB_LOG_IN)
 
+            if self.winCtl.isCancelled():
+                raise WebDriverException("after get()")
+
             # wait for user to log-in
             ifXcptionMsg = "Timed out waiting for log-in"
             plusPlanLink = By.cssSelector(
@@ -70,7 +73,12 @@ class NbControl(object):
 
             return True
         except WebDriverException as e:
-            self.reportError(ifXcptionMsg, e)
+            if self.winCtl.isCancelled():
+                System.err.println("{} - cancelled. {}".format(ifXcptionMsg, e.toString()))
+
+                return False
+            else:
+                self.reportError(ifXcptionMsg, e)
     # end navigateToHoldingDetails()
 
     def getHoldings(self):
@@ -153,6 +161,9 @@ if __name__ == "__main__":
         def close(self):
             with self.nbCtrl:  # make sure we close nbCtrl
                 pass
+
+        def isCancelled(self):
+            return False
     # end class TestConsole
 
     win = TestConsole()

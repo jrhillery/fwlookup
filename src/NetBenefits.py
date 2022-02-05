@@ -38,7 +38,7 @@ class NetBenefits(object):
             self.showWindow()
 
             # SwingWorker instances are not reusable, so make a new one
-            worker = FwLookupWorker(self.lookupConsole, self.fmContext)
+            worker = FwLookupWorker(self.lookupConsole, NetBenefits.name, self.fmContext)
             worker.execute()
         except Throwable as e:
             self.handleException(e)

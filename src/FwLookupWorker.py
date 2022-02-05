@@ -1,10 +1,13 @@
 # properly use the event dispatch thread during lookup
 from decimal import Decimal
+from threading import Event
 
 from com.moneydance.apps.md.controller import FeatureModuleContext
-from java.lang import AutoCloseable, Runnable, System, Throwable
+from java.lang import AutoCloseable, InterruptedException, Runnable, System, Throwable
 from java.text import DecimalFormat
+from java.util.concurrent import CancellationException, ExecutionException
 from javax.swing import SwingUtilities, SwingWorker
+from javax.swing.SwingWorker.StateValue import DONE
 from typing import List
 
 from FwLookupConsole import FwLookupConsole
@@ -15,14 +18,16 @@ from WindowInterface import WindowInterface
 
 class FwLookupWorker(SwingWorker, WindowInterface, AutoCloseable):
 
-    def __init__(self, lookupConsole, fmContext):
-        # type: (FwLookupConsole, FeatureModuleContext) -> None
+    def __init__(self, lookupConsole, extensionName, fmContext):
+        # type: (FwLookupConsole, str, FeatureModuleContext) -> None
         super(FwLookupWorker, self).__init__()
         self.lookupConsole = lookupConsole  # type: FwLookupConsole
+        self.extensionName = extensionName  # type: str
         self.fmContext = fmContext  # type: FeatureModuleContext
         self.nbCtrl = NbControl(self)
+        self.finishedLatch = Event()
         lookupConsole.closeableResource = self
-    # end __init__(FwLookupConsole, FeatureModuleContext)
+    # end __init__(FwLookupConsole, str, FeatureModuleContext)
 
     def getCurrencyFormat(self, amount):
         # type: (Decimal) -> DecimalFormat
@@ -49,14 +54,17 @@ class FwLookupWorker(SwingWorker, WindowInterface, AutoCloseable):
                 return importer.isModified()
         except Throwable as e:
             self.handleException(e)
+        finally:
+            self.finishedLatch.set()
 
         return False
     # end doInBackground()
 
     def done(self):  # runs on event dispatch thread
         # type: () -> None
-        # enable the commit button if we have changes
-        self.lookupConsole.enableCommitButton(self.get())
+        if not self.isCancelled():
+            # enable the commit button if we have changes
+            self.lookupConsole.enableCommitButton(self.get())
     # end done()
 
     def display(self, *msgs):  # runs on worker thread
@@ -78,7 +86,20 @@ class FwLookupWorker(SwingWorker, WindowInterface, AutoCloseable):
     def close(self):
         # type: () -> None
         with self.nbCtrl:  # make sure we close nbCtrl
-            pass
+            if self.getState() != DONE:
+                System.err.println("Cancelling running {} invocation.".format(
+                    self.extensionName))
+                self.cancel(True)
+
+                # wait for worker to complete
+                self.finishedLatch.wait()
+
+                # discard results and some exceptions
+                try:
+                    self.get()
+                except (CancellationException, InterruptedException, ExecutionException):
+                    pass   # ignore
+        # end with w/context
     # end close()
 
 # end class FwLookupWorker

@@ -29,4 +29,11 @@ class WindowInterface(object):
         pass
     # end showInFront()
 
+    @abstractmethod
+    def isCancelled(self):
+        # type: () -> bool
+        """Returns true if this task was cancelled before completing normally"""
+        pass
+    # end isCancelled()
+
 # end class WindowInterface
