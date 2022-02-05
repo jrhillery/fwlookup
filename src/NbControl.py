@@ -1,16 +1,13 @@
 # Use Selenium web driver to launch and control a browser session
 from datetime import date, datetime
-from decimal import Decimal
 from types import TracebackType
 
-from java.lang import AutoCloseable, System
-from java.text import DecimalFormat
+from java.lang import System
 from org.openqa.selenium import By, WebDriverException, WebElement
 from org.openqa.selenium.chrome import ChromeDriver, ChromeOptions
 from org.openqa.selenium.support.ui import ExpectedConditions, WebDriverWait
 from typing import Iterator, List, Optional
 
-from FwLookupConsole import FwLookupConsole
 from NbHolding import NbHolding
 from WindowInterface import WindowInterface
 
@@ -137,41 +134,3 @@ class NbControl(object):
     # end reportError(str, WebDriverException)
 
 # end class NbControl
-
-
-if __name__ == "__main__":
-    class TestConsole(WindowInterface, AutoCloseable):
-        def __init__(self):
-            self.nbCtrl = None  # type: Optional[NbControl]
-            self.lookupConsole = FwLookupConsole("NB Control Title")
-            self.lookupConsole.closeableResource = self
-
-        def getCurrencyFormat(self, amount):
-            # type: (Decimal) -> DecimalFormat
-            return self.lookupConsole.getCurrencyFormat(amount)
-
-        def display(self, *msgs):
-            # type: (*str) -> None
-            for msg in msgs:
-                self.lookupConsole.addText(msg)
-
-        def showInFront(self):
-            self.lookupConsole.showInFront()
-
-        def close(self):
-            with self.nbCtrl:  # make sure we close nbCtrl
-                pass
-
-        def isCancelled(self):
-            return False
-    # end class TestConsole
-
-    win = TestConsole()
-    win.nbCtrl = NbControl(win)
-
-    if win.nbCtrl.getHoldingsDriver():
-        win.display("Starting.")
-
-        if win.nbCtrl.navigateToHoldingsDetails():
-            for hldn in win.nbCtrl.getHoldings():
-                win.display(hldn.__str__())

@@ -83,17 +83,16 @@ System.err.println("Python site packages = {}; user site packages = {}.".format(
     ", ".join(getsitepackages()), getusersitepackages()))
 
 if "__file__" in globals():
-    # running in MoneyBot console
+    # running in MoneyBot console or IDE
     # pick up user's default locale
     setlocale(LC_ALL, "")
+    nb = NetBenefits()
 
     if "moneydance" in globals():
         global moneydance
-        nb = NetBenefits()
         nb.fmContext = moneydance
-        nb.invoke("bot:run")
-    else:
-        System.err.println("Not started via Moneydance, missing global variable.")
+
+    nb.invoke("bot:run")
 else:
     # tell Moneydance to register our object as an extension
     moneydance_extension = NetBenefits()

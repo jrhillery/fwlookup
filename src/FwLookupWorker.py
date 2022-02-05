@@ -46,12 +46,19 @@ class FwLookupWorker(SwingWorker, WindowInterface, AutoCloseable):
         try:
             if self.nbCtrl.getHoldingsDriver() \
                     and self.nbCtrl.navigateToHoldingsDetails():
-                importer = NbImporter(self, self.fmContext.getCurrentAccountBook())
-                self.lookupConsole.staged = importer
-                importer.obtainPrices(self.nbCtrl.getHoldings())
+                if self.fmContext:
+                    importer = NbImporter(self, self.fmContext.getCurrentAccountBook())
+                    self.lookupConsole.staged = importer
+                    importer.obtainPrices(self.nbCtrl.getHoldings())
 
-                # return a boolean to get()
-                return importer.isModified()
+                    # return a boolean to get()
+                    return importer.isModified()
+                else:
+                    # Running test w/o Moneydance
+                    for hldn in self.nbCtrl.getHoldings():
+                        self.display(hldn.__str__())
+
+                    return True
         except Throwable as e:
             self.handleException(e)
         finally:
