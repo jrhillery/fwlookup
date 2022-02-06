@@ -16,6 +16,7 @@ class NetBenefits(object):
     def __init__(self):
         # type: () -> None
         self.lookupConsole = None  # type: Optional[FwLookupConsole]
+        self.lookupWorker = None  # type: Optional[FwLookupWorker]
         self.fmContext = None  # type: Optional[FeatureModuleContext]
     # end __init__()
 
@@ -35,11 +36,14 @@ class NetBenefits(object):
         # type: (str) -> None
         System.err.println(NetBenefits.name + " invoked with uri [{}].".format(uri))
         try:
+            if self.lookupWorker:
+                self.lookupWorker.stopExecute()
             self.showWindow()
 
             # SwingWorker instances are not reusable, so make a new one
-            worker = FwLookupWorker(self.lookupConsole, NetBenefits.name, self.fmContext)
-            worker.execute()
+            self.lookupWorker = FwLookupWorker(
+                self.lookupConsole, NetBenefits.name, self.fmContext)
+            self.lookupWorker.execute()
         except Throwable as e:
             self.handleException(e)
     # end invoke(str)
@@ -60,6 +64,10 @@ class NetBenefits(object):
         if self.lookupConsole:
             self.lookupConsole.goAway()
             self.lookupConsole = None
+
+        if self.lookupWorker:
+            self.lookupWorker.stopExecute()
+            self.lookupWorker = None
         self.fmContext = None
     # end unload()
 

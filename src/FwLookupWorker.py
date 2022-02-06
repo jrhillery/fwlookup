@@ -67,11 +67,17 @@ class FwLookupWorker(SwingWorker, WindowInterface, AutoCloseable):
         return False
     # end doInBackground()
 
-    def done(self):  # runs on event dispatch thread
+    def done(self):  # runs on event dispatch thread after doInBackground finishes
         # type: () -> None
-        if not self.isCancelled():
+        """Enable the commit button if we have changes"""
+        try:
             # enable the commit button if we have changes
             self.lookupConsole.enableCommitButton(self.get())
+        except CancellationException:
+            pass  # ignore
+        except Throwable as e:
+            self.lookupConsole.addText(e.toString())
+            e.printStackTrace(System.err)
     # end done()
 
     def display(self, *msgs):  # runs on worker thread
@@ -81,8 +87,9 @@ class FwLookupWorker(SwingWorker, WindowInterface, AutoCloseable):
 
     def process(self, msgs):  # runs on event dispatch thread
         # type: (List[str]) -> None
-        for msg in msgs:
-            self.lookupConsole.addText(msg)
+        if not self.isCancelled():
+            for msg in msgs:
+                self.lookupConsole.addText(msg)
     # end process(List[str])
 
     def showInFront(self):  # runs on worker thread
@@ -90,8 +97,18 @@ class FwLookupWorker(SwingWorker, WindowInterface, AutoCloseable):
         SwingUtilities.invokeLater(ShowInFront(self.lookupConsole))
     # end showInFront()
 
+    def stopExecute(self):
+        # type: () -> None
+        """Stop a running execution"""
+        self.close()
+
+        # we no longer need closing
+        self.lookupConsole.closeableResource = None
+    # end stopExecute()
+
     def close(self):
         # type: () -> None
+        """Cancel this worker, wait for it to complete, discard its results and close nbCtrl"""
         with self.nbCtrl:  # make sure we close nbCtrl
             if self.getState() != DONE:
                 System.err.println("Cancelling running {} invocation.".format(
@@ -105,7 +122,7 @@ class FwLookupWorker(SwingWorker, WindowInterface, AutoCloseable):
                 try:
                     self.get()
                 except (CancellationException, InterruptedException, ExecutionException):
-                    pass   # ignore
+                    pass  # ignore
         # end with w/context
     # end close()
 
