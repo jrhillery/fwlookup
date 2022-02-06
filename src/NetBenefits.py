@@ -3,14 +3,14 @@ from locale import LC_ALL, setlocale
 from site import getsitepackages, getusersitepackages
 
 from com.moneydance.apps.md.controller import FeatureModule, FeatureModuleContext
-from java.lang import System, Throwable
+from java.lang import AutoCloseable, System, Throwable
 from typing import Optional
 
 from FwLookupConsole import FwLookupConsole
 from FwLookupWorker import FwLookupWorker
 
 
-class NetBenefits(object):
+class NetBenefits(AutoCloseable):
     name = "FW Lookup"
 
     def __init__(self):
@@ -54,9 +54,9 @@ class NetBenefits(object):
 
     def handleException(self, e):
         # type: (Throwable) -> None
+        e.printStackTrace(System.err)
         self.lookupConsole.addText(e.toString())
         self.lookupConsole.enableCommitButton(False)
-        e.printStackTrace(System.err)
     # end handleException(Throwable)
 
     def unload(self):
@@ -77,12 +77,21 @@ class NetBenefits(object):
 
     def showWindow(self):
         # type: () -> None
+        """Show our console window."""
         if self.lookupConsole:
             self.lookupConsole.clearText()
             self.lookupConsole.showInFront()
         else:
             self.lookupConsole = FwLookupConsole(NetBenefits.name)
+            self.lookupConsole.addCloseableResource(self)
     # end showWindow()
+
+    def close(self):
+        # type: () -> None
+        """Closes this resource, relinquishing any underlying resources."""
+        self.lookupConsole = None
+        self.lookupWorker = None
+    # end close()
 
 # end class NetBenefits
 

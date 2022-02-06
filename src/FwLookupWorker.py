@@ -26,7 +26,7 @@ class FwLookupWorker(SwingWorker, WindowInterface, AutoCloseable):
         self.fmContext = fmContext  # type: FeatureModuleContext
         self.nbCtrl = NbControl(self)
         self.finishedLatch = Event()
-        lookupConsole.closeableResource = self
+        lookupConsole.addCloseableResource(self)
     # end __init__(FwLookupConsole, str, FeatureModuleContext)
 
     def getCurrencyFormat(self, amount):
@@ -82,6 +82,7 @@ class FwLookupWorker(SwingWorker, WindowInterface, AutoCloseable):
 
     def display(self, *msgs):  # runs on worker thread
         # type: (*str) -> None
+        # without super(), I get: AttributeError: 'FwLookupWorker' object has no attribute 'publish'
         super(FwLookupWorker, self).publish(msgs)
     # end display(str...)
 
@@ -103,7 +104,7 @@ class FwLookupWorker(SwingWorker, WindowInterface, AutoCloseable):
         self.close()
 
         # we no longer need closing
-        self.lookupConsole.closeableResource = None
+        self.lookupConsole.removeCloseableResource(self)
     # end stopExecute()
 
     def close(self):
