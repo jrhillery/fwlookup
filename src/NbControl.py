@@ -119,9 +119,9 @@ class NbControl(object):
         # type: (Optional[type(BaseException)], Optional[BaseException], Optional[TracebackType]) -> Optional[bool]
         """Release any resources we acquired."""
         if self.webDriver:
-            System.err.println("Quitting web driver {}.".format(
-                self.webDriver.getWindowHandle()))
             self.webDriver.quit()
+            System.err.println("{} closed.".format(
+                self.webDriver.getClass().getSimpleName()))
 
         return None
     # end __exit__(Type[BaseException] | None, BaseException | None, TracebackType | None)
