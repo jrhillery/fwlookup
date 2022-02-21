@@ -1,4 +1,5 @@
 # Use Selenium web driver to launch and control a browser session
+import logging
 from datetime import date, datetime
 from types import TracebackType
 
@@ -71,7 +72,7 @@ class NbControl(object):
             return True
         except WebDriverException as e:
             if self.winCtl.isCancelled():
-                System.err.println("{} - cancelled. {}".format(ifXcptionMsg, e.toString()))
+                logging.info("%s - cancelled. %s", ifXcptionMsg, e.toString())
 
                 return False
             else:
@@ -120,8 +121,7 @@ class NbControl(object):
         """Release any resources we acquired."""
         if self.webDriver:
             self.webDriver.quit()
-            System.err.println("{} closed.".format(
-                self.webDriver.getClass().getSimpleName()))
+            logging.info("%s closed.", self.webDriver.getClass().getSimpleName())
 
         return None
     # end __exit__(Type[BaseException] | None, BaseException | None, TracebackType | None)
@@ -130,6 +130,7 @@ class NbControl(object):
         # type: (str, WebDriverException) -> None
         self.winCtl.showInFront()
         self.winCtl.display(txtMsg + ":<br/>" + xcption.toString())
+        logging.error(txtMsg)
         xcption.printStackTrace(System.err)
     # end reportError(str, WebDriverException)
 

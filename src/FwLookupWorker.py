@@ -1,4 +1,5 @@
 # properly use the event dispatch thread during lookup
+import logging
 from decimal import Decimal
 from threading import Event
 
@@ -112,8 +113,7 @@ class FwLookupWorker(SwingWorker, WindowInterface, AutoCloseable):
         """Cancel this worker, wait for it to complete, discard its results and close nbCtrl"""
         with self.nbCtrl:  # make sure we close nbCtrl
             if self.getState() != DONE:
-                System.err.println("Cancelling running {} invocation.".format(
-                    self.extensionName))
+                logging.info("Cancelling running %s invocation.", self.extensionName)
                 self.cancel(True)
 
                 # wait for worker to complete

@@ -1,4 +1,5 @@
 # show Fidelity NetBenefits balance updates
+import logging
 from collections import deque
 from decimal import Decimal
 
@@ -135,8 +136,8 @@ class FwLookupConsole(JFrame):
         # type: () -> None
         """Remove this frame."""
         winSize = self.getSize()  # type: Dimension
-        System.err.write("Closing {} with width={:.0f}, height={:.0f}.\n".format(
-            self.getTitle(), winSize.width, winSize.height))
+        logging.info("Closing %s with width=%.0f, height=%.0f.",
+                     self.getTitle(), winSize.width, winSize.height)
         self.setVisible(False)
         self.dispose()
 

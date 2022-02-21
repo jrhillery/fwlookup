@@ -1,5 +1,7 @@
 # get Fidelity NetBenefits current balances
+import logging
 from locale import LC_ALL, setlocale
+from logging.config import dictConfig
 from site import getsitepackages, getusersitepackages
 
 from com.moneydance.apps.md.controller import FeatureModule, FeatureModuleContext
@@ -34,7 +36,7 @@ class NetBenefits(AutoCloseable):
     # the feature that we registered in the initialize method
     def invoke(self, uri):
         # type: (str) -> None
-        System.err.println(NetBenefits.name + " invoked with uri [{}].".format(uri))
+        logging.info("%s invoked with uri [%s].", NetBenefits.name, uri)
         try:
             if self.lookupWorker:
                 self.lookupWorker.stopExecute()
@@ -96,8 +98,34 @@ class NetBenefits(AutoCloseable):
 # end class NetBenefits
 
 
-System.err.println("Python site packages = {}; user site packages = {}.".format(
-    ", ".join(getsitepackages()), getusersitepackages()))
+def configLogging():
+    dictConfig({
+        "version": 1,
+        "formatters": {
+            "simple": {
+                "format": "%(asctime)s.%(msecs)03d %(message)s",
+                "datefmt": "%H:%M:%S"
+            }
+        },
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "level": "INFO",
+                "formatter": "simple",
+                "stream": System.err
+            }
+        },
+        "root": {
+            "level": "DEBUG",
+            "handlers": ["console"]
+        }
+    })
+# end configLogging()
+
+
+configLogging()
+logging.info("Python site packages = %s; user site packages = %s.",
+             ", ".join(getsitepackages()), getusersitepackages())
 
 if "__file__" in globals():
     # running in MoneyBot console or IDE
