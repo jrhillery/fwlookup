@@ -1,13 +1,11 @@
 # show Fidelity NetBenefits balance updates
 import logging
 from collections import deque
-from decimal import Decimal
 
 from com.leastlogic.swing.util import HTMLPane
 from java.awt import AWTEvent, Dimension
 from java.awt.event import ActionEvent, WindowEvent
 from java.lang import AutoCloseable, System, Throwable
-from java.text import DecimalFormat, NumberFormat
 from javax.swing import GroupLayout, JButton, JFrame, JPanel
 from javax.swing import JScrollPane, LayoutStyle, WindowConstants
 from javax.swing.border import EmptyBorder
@@ -101,16 +99,6 @@ class FwLookupConsole(JFrame):
         self.btnCommit.enabled = b
     # end enableCommitButton(bool)
 
-    def getCurrencyFormat(self, amount):
-        # type: (Decimal) -> DecimalFormat
-        """Get a currency number format with the number of fraction digits in 'amount'"""
-        amtScale = -amount.as_tuple().exponent
-        formatter = NumberFormat.getCurrencyInstance(self.getLocale())
-        formatter.minimumFractionDigits = amtScale
-
-        return formatter
-    # end getCurrencyFormat(Decimal)
-
     def addCloseableResource(self, closeable):
         # type: (AutoCloseable) -> None
         """Store an object with resources to close."""
@@ -155,11 +143,9 @@ class FwLookupConsole(JFrame):
 
 if __name__ == "__main__":
     frame = FwLookupConsole("FW Lookup Title")  # type: FwLookupConsole
-    amt = Decimal("14.00")
-    fmt = frame.getCurrencyFormat(amt)
     # noinspection SpellCheckingInspection
-    frame.addText("Change Eaton Vance Equity Inc (ETY) price for today from {} to "
-                  "$14.23 (<span class='incrs'>+1.64%</span>).".format(fmt.format(amt)))
+    frame.addText("Change Eaton Vance Equity Inc (ETY) price for today from $14.00 to "
+                  "$14.23 (<span class='incrs'>+1.64%</span>).")
     # noinspection SpellCheckingInspection
     frame.addText("Change IBM Common Stock (IBM) price for today from "
                   "$119.00 to $118.84 (<span class='decrs'>-0.13%</span>).")

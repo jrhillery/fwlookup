@@ -9,6 +9,7 @@ from com.leastlogic.moneydance.util import SnapshotList, MdUtil
 from com.leastlogic.swing.util import HTMLPane
 from typing import Dict, Iterable, Set
 
+from Currency import currencyFmt
 from NbHolding import NbHolding
 from SecurityHandler import SecurityHandler
 from StagedInterface import StagedInterface
@@ -71,12 +72,11 @@ class NbImporter(StagedInterface):
             balance = getCurrentBalance(account)  # type: Decimal
 
             if holding.bal != balance:
-                cf = self.winCtl.getCurrencyFormat(holding.bal)
                 self.winCtl.display(
                     "FWIMP02: Found a different balance in account {}: have {}, found {}. "
                     "Note: No Moneydance security {} for ticker symbol ({}).".format(
-                        account.getAccountName(), cf.format(balance), cf.format(holding.bal),
-                        holding.name, holding.ticker))
+                        account.getAccountName(), currencyFmt(balance, holding.bal),
+                        currencyFmt(holding.bal), holding.name, holding.ticker))
     # end verifyAccountBalance(Account, NbHolding)
 
     def addHandler(self, handler):
@@ -94,12 +94,11 @@ class NbImporter(StagedInterface):
         # store this quote if it differs, and we don't already have this security
         if (not snapshot or effectiveDate != snapshot.getDateInt()
                 or price != oldPrice) and security not in self.priceChanges:
-            priceFmt = self.winCtl.getCurrencyFormat(price)
             self.winCtl.display(
                 "FWIMP03: Change {} ({}) price from {} to {} "
                 "(<span class=\"{}\">{:+.2f}%</span>).".format(
                     security.getName(), holding.ticker,
-                    priceFmt.format(oldPrice), priceFmt.format(price),
+                    currencyFmt(oldPrice, price), currencyFmt(price),
                     HTMLPane.getSpanCl(price, oldPrice),
                     (price / oldPrice - 1).scaleb(2)))
 

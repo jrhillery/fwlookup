@@ -1,11 +1,9 @@
 # properly use the event dispatch thread during lookup
 import logging
-from decimal import Decimal
 from threading import Event
 
 from com.moneydance.apps.md.controller import FeatureModuleContext
 from java.lang import AutoCloseable, InterruptedException, Runnable, System, Throwable
-from java.text import DecimalFormat
 from java.util.concurrent import CancellationException, ExecutionException
 from javax.swing import SwingUtilities, SwingWorker
 from javax.swing.SwingWorker.StateValue import DONE
@@ -29,11 +27,6 @@ class FwLookupWorker(SwingWorker, WindowInterface, AutoCloseable):
         self.finishedLatch = Event()
         lookupConsole.addCloseableResource(self)
     # end __init__(FwLookupConsole, str, FeatureModuleContext)
-
-    def getCurrencyFormat(self, amount):
-        # type: (Decimal) -> DecimalFormat
-        return self.lookupConsole.getCurrencyFormat(amount)
-    # end getCurrencyFormat(Decimal)
 
     def handleException(self, e):
         # type: (Throwable) -> None

@@ -1,19 +1,10 @@
-from abc import ABCMeta, abstractmethod
-from decimal import Decimal
 
-from java.text import DecimalFormat
+from abc import ABCMeta, abstractmethod
 
 
 class WindowInterface(object):
     """An interface to control our Swing window"""
     __metaclass__ = ABCMeta
-
-    @abstractmethod
-    def getCurrencyFormat(self, amount):
-        # type: (Decimal) -> DecimalFormat
-        """Get a currency number format with the number of fraction digits in 'amount'"""
-        pass
-    # end getCurrencyFormat(Decimal)
 
     @abstractmethod
     def display(self, *msgs):
