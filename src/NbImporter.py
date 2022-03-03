@@ -9,7 +9,7 @@ from com.leastlogic.moneydance.util import SnapshotList, MdUtil
 from com.leastlogic.swing.util import HTMLPane
 from typing import Dict, Iterable, Set
 
-from Currency import currencyFmt
+from Currency import Currency
 from NbHolding import NbHolding
 from SecurityHandler import SecurityHandler
 from StagedInterface import StagedInterface
@@ -75,8 +75,8 @@ class NbImporter(StagedInterface):
                 self.winCtl.display(
                     "FWIMP02: Found a different balance in account {}: have {}, found {}. "
                     "Note: No Moneydance security {} for ticker symbol ({}).".format(
-                        account.getAccountName(), currencyFmt(balance, holding.bal),
-                        currencyFmt(holding.bal), holding.name, holding.ticker))
+                        account.getAccountName(), Currency.format(balance, holding.bal),
+                        Currency.format(holding.bal), holding.name, holding.ticker))
     # end verifyAccountBalance(Account, NbHolding)
 
     def addHandler(self, handler):
@@ -98,7 +98,7 @@ class NbImporter(StagedInterface):
                 "FWIMP03: Change {} ({}) price from {} to {} "
                 "(<span class=\"{}\">{:+.2f}%</span>).".format(
                     security.getName(), holding.ticker,
-                    currencyFmt(oldPrice, price), currencyFmt(price),
+                    Currency.format(oldPrice, price), Currency.format(price),
                     HTMLPane.getSpanCl(price, oldPrice),
                     (price / oldPrice - 1).scaleb(2)))
 

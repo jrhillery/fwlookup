@@ -1,6 +1,5 @@
 # get Fidelity NetBenefits current balances
 import logging
-from locale import LC_ALL, setlocale
 from logging.config import dictConfig
 from site import getsitepackages, getusersitepackages
 
@@ -129,8 +128,6 @@ logging.info("Python site packages = %s; user site packages = %s.",
 
 if "__file__" in globals():
     # running in MoneyBot console or IDE
-    # pick up user's default locale
-    setlocale(LC_ALL, "")
     nb = NetBenefits()
 
     if "moneydance" in globals():

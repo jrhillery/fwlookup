@@ -1,30 +1,10 @@
 # Represent Moneydance security holdings details
 from datetime import date
 from decimal import Decimal, ROUND_HALF_EVEN
-from locale import localeconv
 
 from typing import Dict
 
-
-def delocalize(st):
-    # type: (str) -> str
-    """Parses a string as a normalized number according to the locale settings."""
-
-    conv = localeconv()
-
-    # First, get rid of the currency symbol
-    cs = conv["currency_symbol"]
-    st = st.strip(cs if cs else "$")
-
-    # next, get rid of the grouping
-    ts = conv["thousands_sep"]
-    st = st.replace(ts if ts else ",", "")
-
-    # next, replace the decimal point with a dot
-    dp = conv["decimal_point"]
-
-    return st.replace(dp, ".") if dp else st
-# end delocalize(str)
+from Currency import Currency
 
 
 class NbHolding(object):
@@ -45,8 +25,8 @@ class NbHolding(object):
         # type: (str, Dict[str, str], date) -> None
         self.name = name  # type: str
         self.ticker, self.prec = NbHolding._TICKR[name]
-        self.bal = Decimal(delocalize(dataDict["Current Balance ($)"]))
-        self.shares = Decimal(delocalize(dataDict["Shares or Units"]))
+        self.bal = Decimal(Currency.delocalize(dataDict["Current Balance ($)"]))
+        self.shares = Decimal(Currency.delocalize(dataDict["Shares or Units"]))
         self.eDate = effDate  # type: date
 
     def getPrice(self):
