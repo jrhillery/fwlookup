@@ -11,7 +11,6 @@ class NbHolding(object):
     """Houses details for a holding"""
 
     _PREC2 = Decimal("0.00")
-    _PREC6 = Decimal("0.000000")
     _PREC7 = Decimal("0.0000000")
     # noinspection SpellCheckingInspection
     _TICKR = {"HI YLD EMG MKT BOND" : ("NON40OJFI", _PREC7),
@@ -19,7 +18,7 @@ class NbHolding(object):
               "INTEREST INCOME FUND": ("NON40OJFA", _PREC7),
               "PIM INTL BD US$H I"  : ("PFORX"    , _PREC2),
               "TARGETRETIREMENT2040": ("NON40OJGZ", _PREC7),
-              "TOTAL BOND MARKET"   : ("NON40OJFC", _PREC6)}
+              "TOTAL BOND MARKET"   : ("NON40OJFC", _PREC7)}
 
     def __init__(self, name, dataDict, effDate):
         # type: (str, Dict[str, str], date) -> None
