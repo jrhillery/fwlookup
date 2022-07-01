@@ -4,6 +4,7 @@ from datetime import date, datetime
 from types import TracebackType
 
 from java.lang import System
+from java.time import Duration
 from org.openqa.selenium import By, WebDriverException, WebElement
 from org.openqa.selenium.chrome import ChromeDriver, ChromeOptions
 from org.openqa.selenium.support.ui import ExpectedConditions, WebDriverWait
@@ -52,7 +53,7 @@ class NbControl(object):
             ifXcptionMsg = "Timed out waiting for log-in"
             plusPlanLink = By.cssSelector(
                 "#client-employer a[aria-Label='IBM 401(K) PLUS PLAN Summary.']")  # type: By
-            link = WebDriverWait(self.webDriver, 55) \
+            link = WebDriverWait(self.webDriver, Duration.ofSeconds(55)) \
                 .until(ExpectedConditions.elementToBeClickable(plusPlanLink))
             self.winCtl.showInFront()
 
@@ -62,7 +63,7 @@ class NbControl(object):
 
             # render holdings details
             ifXcptionMsg = "Timed out waiting for holdings page"
-            link = WebDriverWait(self.webDriver, 8) \
+            link = WebDriverWait(self.webDriver, Duration.ofSeconds(8)) \
                 .until(ExpectedConditions.elementToBeClickable(By.cssSelector(
                     "#holdings-section .show-details-link")))
             self.winCtl.display("FWIMP01: Obtaining price data from {}.".format(
