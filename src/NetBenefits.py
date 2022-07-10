@@ -1,12 +1,12 @@
 # get Fidelity NetBenefits current balances
 import logging
-from logging.config import dictConfig
 from site import getsitepackages, getusersitepackages
 
 from com.moneydance.apps.md.controller import FeatureModule, FeatureModuleContext
 from java.lang import AutoCloseable, System, Throwable
 from typing import Optional
 
+from Configure import Configure
 from FwLookupConsole import FwLookupConsole
 from FwLookupWorker import FwLookupWorker
 
@@ -97,32 +97,7 @@ class NetBenefits(AutoCloseable):
 # end class NetBenefits
 
 
-def configLogging():
-    dictConfig({
-        "version": 1,
-        "formatters": {
-            "simple": {
-                "format": "%(asctime)s.%(msecs)03d %(message)s",
-                "datefmt": "%H:%M:%S"
-            }
-        },
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "level": "INFO",
-                "formatter": "simple",
-                "stream": System.err
-            }
-        },
-        "root": {
-            "level": "DEBUG",
-            "handlers": ["console"]
-        }
-    })
-# end configLogging()
-
-
-configLogging()
+Configure.logToSysErr()
 logging.info("Python site packages = %s; user site packages = %s.",
              ", ".join(getsitepackages()), getusersitepackages())
 

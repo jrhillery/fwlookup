@@ -1,40 +1,15 @@
 
 import logging
-from logging.config import dictConfig
 
 from com.infinitekind.moneydance.model import Account, CurrencySnapshot
 from com.infinitekind.moneydance.model import CurrencyTable, CurrencyType
 from com.moneydance.apps.md.controller import FeatureModuleContext
-from java.lang import System
 from typing import List
 
-
-def configLogging():
-    dictConfig({
-        "version": 1,
-        "formatters": {
-            "simple": {
-                "format": "%(asctime)s.%(msecs)03d %(message)s",
-                "datefmt": "%H:%M:%S"
-            }
-        },
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "level": "INFO",
-                "formatter": "simple",
-                "stream": System.err
-            }
-        },
-        "root": {
-            "level": "DEBUG",
-            "handlers": ["console"]
-        }
-    })
-# end configLogging()
+from Configure import Configure
 
 
-configLogging()
+Configure.logToSysErr()
 
 if "moneydance" in globals():
     global moneydance  # type: FeatureModuleContext
