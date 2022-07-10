@@ -1,9 +1,8 @@
 
 import logging
 
-from com.infinitekind.moneydance.model import Account, CurrencySnapshot
+from com.infinitekind.moneydance.model import Account, AccountBook, CurrencySnapshot
 from com.infinitekind.moneydance.model import CurrencyTable, CurrencyType
-from com.moneydance.apps.md.controller import FeatureModuleContext
 from typing import List
 
 from Configure import Configure
@@ -12,8 +11,8 @@ from Configure import Configure
 Configure.logToSysErr()
 
 if "moneydance" in globals():
-    global moneydance  # type: FeatureModuleContext
-    accountBook = moneydance.getCurrentAccountBook()
+    global moneydance
+    accountBook = moneydance.getCurrentAccountBook()  # type: AccountBook
     root = accountBook.getRootAccount()  # type: Account
     securities = accountBook.getCurrencies()  # type: CurrencyTable
     sourceSecurity = securities.getCurrencyByTickerSymbol("FSPSX")  # type: CurrencyType
