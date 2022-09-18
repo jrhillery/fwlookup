@@ -53,7 +53,7 @@ class NbControl(object):
             ifXcptionMsg = "Timed out waiting for log-in"
             plusPlanLink = By.cssSelector(
                 "#client-employer a[aria-Label='IBM 401(K) PLUS PLAN Summary.']")  # type: By
-            link = WebDriverWait(self.webDriver, Duration.ofSeconds(55)) \
+            link = WebDriverWait(self.webDriver, Duration.ofMinutes(5)) \
                 .until(ExpectedConditions.elementToBeClickable(plusPlanLink))
             self.winCtl.showInFront()
 
