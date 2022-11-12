@@ -3,10 +3,11 @@ import logging
 from threading import Event
 
 from com.moneydance.apps.md.controller import FeatureModuleContext
-from java.lang import AutoCloseable, InterruptedException, Runnable, System, Throwable
+from java.lang import AutoCloseable, InterruptedException, Runnable, System, Thread, Throwable
 from java.util.concurrent import CancellationException, ExecutionException
 from javax.swing import SwingUtilities, SwingWorker
 from javax.swing.SwingWorker.StateValue import DONE
+from org.python.core import imp
 from typing import List
 
 from FwLookupConsole import FwLookupConsole
@@ -38,6 +39,9 @@ class FwLookupWorker(SwingWorker, WindowInterface, AutoCloseable):
         # type: () -> bool
         """Long-running routine to lookup Fidelity workplace account data"""
         try:
+            # Selenium web driver needs to be on the classpath
+            Thread.currentThread().setContextClassLoader(imp.getSyspathJavaLoader())
+
             if self.nbCtrl.getHoldingsDriver() \
                     and self.nbCtrl.navigateToHoldingsDetails():
                 if self.fmContext:

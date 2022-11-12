@@ -9,7 +9,8 @@ http://jakarta.apache.org/ant/index.html
   <property name="moneydance.devkit" value="C:/Users/John/Documents/Prog/moneydance-devkit-5.1"/>
   <property name="mdutil" value="${src}/../mdutil/md-util"/>
   <property name="swingutil" value="${src}/../mdutil/swing-util"/>
-  <property name="selenium-java" value="${src}/../../ad/3rdParty/selenium-java-3.141.59"/>
+  <property name="selenium-java" value="${src}/../../selenium-java-4.6.0"/>
+  <property name="slf4j" value="${src}/../../SLF4J/slf4j-jdk14-2.0.3.jar"/>
   <property name="privkeyfile" value="${build}/priv_key"/>
   <property name="pubkeyfile" value="${build}/pub_key"/>
   <property name="privkeyid" value="99"/>
@@ -42,8 +43,9 @@ http://jakarta.apache.org/ant/index.html
       <fileset dir="${src}/src/main/resources"/>
       <fileset dir="${build}" includes="com/**"/>
       <zipgroupfileset dir="${selenium-java}"
-                       includes="*.jar libs/*.jar"
+                       includes="*.jar lib/*.jar"
                        excludes="*-sources.jar"/>
+      <zipfileset src="${slf4j}"/>
     </jar>
 
     <sleep seconds="5"/>
