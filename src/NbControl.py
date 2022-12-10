@@ -16,9 +16,9 @@ from WindowInterface import WindowInterface
 
 class NbControl(object):
     """Controls browsing NetBenefits web pages"""
-    CHROME_USER_DATA = "user-data-dir=C:/Users/John/AppData/Local/VSCode/Chrome/User Data"
+    CHROME_USER_DATA = "user-data-dir=C:/Users/John/.local/Chrome/User Data"
+    CHROME_DEBUGGER_ADDRESS = "localhost:14001"
     NB_LOG_IN = "https://nb.fidelity.com/public/nb/default/home"
-    # CALCULATOR_PAGE = "http://www.calculator.net"  # By.linkText("Math Calculators")
 
     def __init__(self, winCtl):
         # type: (WindowInterface) -> None
@@ -32,6 +32,7 @@ class NbControl(object):
         try:
             crOpts = ChromeOptions()
             crOpts.addArguments(NbControl.CHROME_USER_DATA)
+            # crOpts.setExperimentalOption("debuggerAddress", self.CHROME_DEBUGGER_ADDRESS)
             self.webDriver = ChromeDriver(crOpts)
 
             return self.webDriver
