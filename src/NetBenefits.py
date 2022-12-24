@@ -1,6 +1,6 @@
 # get Fidelity NetBenefits current balances
 import logging
-from site import getsitepackages, getusersitepackages
+from site import getusersitepackages
 
 from com.moneydance.apps.md.controller import FeatureModule, FeatureModuleContext
 from java.lang import AutoCloseable, System, Throwable
@@ -98,8 +98,7 @@ class NetBenefits(AutoCloseable):
 
 
 Configure.logToSysErr()
-logging.info("Python site packages = %s; user site packages = %s.",
-             ", ".join(getsitepackages()), getusersitepackages())
+logging.info("Python user site packages = %s.", getusersitepackages())
 
 if "__file__" in globals():
     # running in MoneyBot console or IDE
