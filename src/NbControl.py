@@ -31,8 +31,13 @@ class NbControl(object):
         # open browser instance
         try:
             crOpts = ChromeOptions()
-            crOpts.addArguments(NbControl.CHROME_USER_DATA)
-            # crOpts.setExperimentalOption("debuggerAddress", self.CHROME_DEBUGGER_ADDRESS)
+            autoStartBrowser = True
+
+            if autoStartBrowser:
+                crOpts.addArguments(NbControl.CHROME_USER_DATA)
+                crOpts.addArguments("remote-allow-origins=*")  # temporary workaround for https://github.com/SeleniumHQ/selenium/issues/11750
+            else:
+                crOpts.setExperimentalOption("debuggerAddress", self.CHROME_DEBUGGER_ADDRESS)
             self.webDriver = ChromeDriver(crOpts)
 
             return self.webDriver
