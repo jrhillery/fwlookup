@@ -1,6 +1,7 @@
 # Use Selenium web driver to launch and control a browser session
 import logging
 from datetime import date, datetime
+from httplib import HTTPConnection
 from types import TracebackType
 
 from java.lang import System
@@ -28,10 +29,23 @@ class NbControl(object):
 
     def getHoldingsDriver(self):
         # type: () -> Optional[ChromeDriver]
+        # determine if browser is already started
+        conn = None
+        try:
+            conn = HTTPConnection(self.CHROME_DEBUGGER_ADDRESS)
+            conn.connect()
+            logging.error("Connecting to existing browser")
+            autoStartBrowser = False
+        except IOError as e:
+            logging.error("Existing browser not found (%s)", e)
+            autoStartBrowser = True
+        finally:
+            if conn is not None:
+                conn.close()
+
         # open browser instance
         try:
             crOpts = ChromeOptions()
-            autoStartBrowser = True
 
             if autoStartBrowser:
                 crOpts.addArguments(NbControl.CHROME_USER_DATA)
