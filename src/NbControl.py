@@ -37,7 +37,7 @@ class NbControl(object):
             logging.error("Connecting to existing browser")
             autoStartBrowser = False
         except IOError as e:
-            logging.error("Existing browser not found (%s)", e)
+            logging.error("Starting new browser (existing: %s)", e)
             autoStartBrowser = True
         finally:
             if conn is not None:
@@ -49,7 +49,6 @@ class NbControl(object):
 
             if autoStartBrowser:
                 crOpts.addArguments(NbControl.CHROME_USER_DATA)
-                crOpts.addArguments("remote-allow-origins=*")  # temporary workaround for https://github.com/SeleniumHQ/selenium/issues/11750
             else:
                 crOpts.setExperimentalOption("debuggerAddress", self.CHROME_DEBUGGER_ADDRESS)
             self.webDriver = ChromeDriver(crOpts)
