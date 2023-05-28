@@ -9,7 +9,7 @@ http://jakarta.apache.org/ant/index.html
   <property name="moneydance.devkit" value="C:/Users/John/Documents/Prog/moneydance-devkit-5.1"/>
   <property name="mdutil" value="${src}/../mdutil/md-util"/>
   <property name="swingutil" value="${src}/../mdutil/swing-util"/>
-  <property name="selenium-java" value="${src}/../../selenium-java-4.9.0"/>
+  <property name="selenium-java" value="${src}/../../selenium-java-4.9.1"/>
   <property name="slf4j" value="${src}/../../SLF4J/slf4j-jdk14-2.0.3.jar"/>
   <property name="privkeyfile" value="${build}/priv_key"/>
   <property name="pubkeyfile" value="${build}/pub_key"/>
