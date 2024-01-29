@@ -4,10 +4,11 @@ from datetime import date, datetime
 from httplib import HTTPConnection
 from types import TracebackType
 
+from java.io import File
 from java.lang import System
 from java.time import Duration
 from org.openqa.selenium import By, WebDriverException, WebElement
-from org.openqa.selenium.chrome import ChromeDriver, ChromeOptions
+from org.openqa.selenium.chrome import ChromeDriver, ChromeDriverService, ChromeOptions
 from org.openqa.selenium.support.ui import ExpectedConditions, WebDriverWait
 from typing import Iterator, List, Optional
 
@@ -17,6 +18,7 @@ from WindowInterface import WindowInterface
 
 class NbControl(object):
     """Controls browsing NetBenefits web pages"""
+    CHROME_DRIVER_BIN = File("C:/util/chromedriver.exe")
     CHROME_USER_DATA = "user-data-dir=C:/Users/John/.local/Chrome/User Data"
     CHROME_DEBUGGER_ADDRESS = "localhost:14001"
     NB_LOG_IN = "https://nb.fidelity.com/public/nb/default/home"
@@ -45,13 +47,15 @@ class NbControl(object):
 
         # open browser instance
         try:
+            crSvcBldr = ChromeDriverService.Builder()
             crOpts = ChromeOptions()
 
             if autoStartBrowser:
+                crSvcBldr.usingDriverExecutable(self.CHROME_DRIVER_BIN)
                 crOpts.addArguments(NbControl.CHROME_USER_DATA)
             else:
                 crOpts.setExperimentalOption("debuggerAddress", self.CHROME_DEBUGGER_ADDRESS)
-            self.webDriver = ChromeDriver(crOpts)
+            self.webDriver = ChromeDriver(crSvcBldr.build(), crOpts)
 
             return self.webDriver
         except WebDriverException as e:
