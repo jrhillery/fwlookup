@@ -4,7 +4,6 @@ from decimal import Decimal, ROUND_HALF_EVEN
 
 from com.infinitekind.moneydance.model import Account, AccountBook, CurrencySnapshot
 from com.infinitekind.moneydance.model import CurrencyTable, CurrencyType
-from com.infinitekind.moneydance.model.Account.AccountType import ASSET
 from com.leastlogic.moneydance.util import SnapshotList, MdUtil
 from com.leastlogic.swing.util import HTMLPane
 from typing import Dict, Iterable, Set
@@ -18,7 +17,7 @@ from WindowInterface import WindowInterface
 
 def getCurrentBalance(account):
     # type: (Account) -> Decimal
-    if account.getAccountType() == ASSET:
+    if account.getAccountType() == Account.AccountType.ASSET:
         centBalance = Decimal(account.getRecursiveUserCurrentBalance())
     else:
         centBalance = Decimal(account.getUserCurrentBalance())

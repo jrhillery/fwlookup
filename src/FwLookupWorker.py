@@ -6,7 +6,6 @@ from com.moneydance.apps.md.controller import FeatureModuleContext
 from java.lang import AutoCloseable, InterruptedException, Runnable, System, Thread, Throwable
 from java.util.concurrent import CancellationException, ExecutionException
 from javax.swing import SwingUtilities, SwingWorker
-from javax.swing.SwingWorker.StateValue import DONE
 from org.python.core import imp
 from typing import List
 
@@ -109,7 +108,7 @@ class FwLookupWorker(SwingWorker, WindowInterface, AutoCloseable):
         # type: () -> None
         """Cancel this worker, wait for it to complete, discard its results and close nbCtrl"""
         with self.nbCtrl:  # make sure we close nbCtrl
-            if self.getState() != DONE:
+            if self.getState() != SwingWorker.StateValue.DONE:
                 logging.info("Cancelling running %s invocation.", self.extensionName)
                 self.cancel(True)
 
