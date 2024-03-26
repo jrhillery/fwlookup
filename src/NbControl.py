@@ -39,7 +39,13 @@ class NbControl(object):
             logging.error("Connecting to existing browser")
             autoStartBrowser = False
         except IOError as e:
-            logging.error("Starting new browser (existing: %s)", e)
+            msg = ["Starting new browser"]  # type: List[str]
+
+            if e.errno != 10061:
+                msg.append(" (existing: ")
+                msg.append(str(e))
+                msg.append(")")
+            logging.error("".join(msg))
             autoStartBrowser = True
         finally:
             if conn is not None:
