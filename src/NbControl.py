@@ -41,7 +41,7 @@ class NbControl(object):
         except IOError as e:
             msg = ["Starting new browser"]  # type: List[str]
 
-            if e.errno != 10061:
+            if e.errno != 10061:  # Suppress common case details: Connection refused
                 msg.append(" (existing: ")
                 msg.append(str(e))
                 msg.append(")")
