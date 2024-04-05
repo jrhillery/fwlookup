@@ -24,7 +24,7 @@ class FwLookupConsole(JFrame):
 
         # Initialize the swing components.
         self.defaultCloseOperation = WindowConstants.DO_NOTHING_ON_CLOSE
-        self.size = 630, 389
+        self.size = 639, 395
         contentPane = JPanel()
         contentPane.border = EmptyBorder(5, 5, 5, 5)
         self.contentPane = contentPane
