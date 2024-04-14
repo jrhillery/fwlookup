@@ -11,9 +11,10 @@ class NbHolding(object):
     """Houses details for a holding"""
 
     _PREC2 = Decimal("0.00")
+    _PREC6 = Decimal("0.000000")
     _PREC7 = Decimal("0.0000000")
     # noinspection SpellCheckingInspection
-    _TICKR = {"HI YLD EMG MKT BOND" : ("NON40OJFI", _PREC7),
+    _TICKR = {"HI YLD EMG MKT BOND" : ("NON40OJFI", _PREC6),
               "INFL PROTECTED BOND" : ("NON40OJFB", _PREC7),
               "INTEREST INCOME FUND": ("NON40OJFA", _PREC7),
               "PIM INTL BD US$H I"  : ("PFORX"    , _PREC2),
