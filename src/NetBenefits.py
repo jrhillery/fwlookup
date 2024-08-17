@@ -83,7 +83,8 @@ class NetBenefits(AutoCloseable):
             self.lookupConsole.clearText()
             self.lookupConsole.showInFront()
         else:
-            self.lookupConsole = FwLookupConsole(NetBenefits.name)
+            self.lookupConsole = FwLookupConsole(
+                NetBenefits.name, self.fmContext.getCurrentAccountBook().getLocalStorage())
             self.lookupConsole.addCloseableResource(self)
     # end showWindow()
 

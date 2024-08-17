@@ -1,30 +1,32 @@
 # show Fidelity NetBenefits balance updates
-import logging
 from collections import deque
 
-from com.leastlogic.swing.util import HTMLPane
-from java.awt import AWTEvent, Dimension
-from java.awt.event import ActionEvent, WindowEvent
-from java.lang import AutoCloseable, System, Throwable
-from javax.swing import GroupLayout, JButton, JFrame, JPanel
-from javax.swing import JScrollPane, LayoutStyle, WindowConstants
-from javax.swing.border import EmptyBorder
 from typing import Optional
 
 from StagedInterface import StagedInterface
+from com.leastlogic.moneydance.util import MdStorageUtil
+from com.leastlogic.swing.util import HTMLPane
+from java.awt import AWTEvent
+from java.awt.event import ActionEvent, WindowEvent
+from java.lang import AutoCloseable, System, Throwable
+from java.util import Map
+from javax.swing import GroupLayout, JButton, JFrame, JPanel
+from javax.swing import JScrollPane, LayoutStyle, WindowConstants
+from javax.swing.border import EmptyBorder
 
 
 class FwLookupConsole(JFrame):
 
-    def __init__(self, title):
-        # type: (str) -> None
+    def __init__(self, title, storage):
+        # type: (str, Optional[Map]) -> None
         super(FwLookupConsole, self).__init__(title)
+        self.mdStorage = MdStorageUtil("fwlookup", storage)
         self.staged = None  # type: Optional[StagedInterface]
         self.closeableResources = deque()  # type: deque[AutoCloseable]
 
         # Initialize the swing components.
         self.defaultCloseOperation = WindowConstants.DO_NOTHING_ON_CLOSE
-        self.size = 639, 395
+        self.mdStorage.setWindowCoordinates(self, 639, 395)
         contentPane = JPanel()
         contentPane.border = EmptyBorder(5, 5, 5, 5)
         self.contentPane = contentPane
@@ -123,9 +125,7 @@ class FwLookupConsole(JFrame):
     def goAway(self):
         # type: () -> None
         """Remove this frame."""
-        winSize = self.getSize()  # type: Dimension
-        logging.info("Closing %s with width=%.0f, height=%.0f.",
-                     self.getTitle(), winSize.width, winSize.height)
+        self.mdStorage.persistWindowCoordinates(self)
         self.setVisible(False)
         self.dispose()
 
@@ -142,7 +142,7 @@ class FwLookupConsole(JFrame):
 
 
 if __name__ == "__main__":
-    frame = FwLookupConsole("FW Lookup Title")  # type: FwLookupConsole
+    frame = FwLookupConsole("FW Lookup Title", None)  # type: FwLookupConsole
     # noinspection SpellCheckingInspection
     frame.addText("Change Eaton Vance Equity Inc (ETY) price for today from $14.00 to "
                   "$14.23 (<span class='incrs'>+1.64%</span>).")
