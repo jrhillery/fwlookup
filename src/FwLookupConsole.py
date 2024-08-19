@@ -3,8 +3,8 @@ from collections import deque
 
 from typing import Optional
 
+from StagedInterface import StagedInterface
 from com.leastlogic.moneydance.util import MdStorageUtil
-from com.leastlogic.moneydance.util import StagedInterface
 from com.leastlogic.swing.util import AwtScreenUtil
 from com.leastlogic.swing.util import HTMLPane
 from java.awt import AWTEvent
