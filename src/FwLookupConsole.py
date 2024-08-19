@@ -3,8 +3,9 @@ from collections import deque
 
 from typing import Optional
 
-from StagedInterface import StagedInterface
 from com.leastlogic.moneydance.util import MdStorageUtil
+from com.leastlogic.moneydance.util import StagedInterface
+from com.leastlogic.swing.util import AwtScreenUtil
 from com.leastlogic.swing.util import HTMLPane
 from java.awt import AWTEvent
 from java.awt.event import ActionEvent, WindowEvent
@@ -20,13 +21,14 @@ class FwLookupConsole(JFrame):
     def __init__(self, title, storage):
         # type: (str, Optional[Map]) -> None
         super(FwLookupConsole, self).__init__(title)
+        self.screenUtil = AwtScreenUtil(self)
         self.mdStorage = MdStorageUtil("fwlookup", storage)
         self.staged = None  # type: Optional[StagedInterface]
         self.closeableResources = deque()  # type: deque[AutoCloseable]
 
         # Initialize the swing components.
         self.defaultCloseOperation = WindowConstants.DO_NOTHING_ON_CLOSE
-        self.mdStorage.setWindowCoordinates(self, 639, 395)
+        self.screenUtil.setWindowCoordinates(self.mdStorage, 639, 395)
         contentPane = JPanel()
         contentPane.border = EmptyBorder(5, 5, 5, 5)
         self.contentPane = contentPane
@@ -125,7 +127,7 @@ class FwLookupConsole(JFrame):
     def goAway(self):
         # type: () -> None
         """Remove this frame."""
-        self.mdStorage.persistWindowCoordinates(self)
+        self.screenUtil.persistWindowCoordinates(self.mdStorage)
         self.setVisible(False)
         self.dispose()
 
