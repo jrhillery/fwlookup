@@ -81,6 +81,7 @@ class NbImporter(StagedInterface):
     def addHandler(self, handler):
         # type: (SecurityHandler) -> None
         self.priceChanges[handler.security] = handler
+    # end addHandler(SecurityHandler)
 
     def storePriceQuoteIfDiff(self, security, holding):
         # type: (CurrencyType, NbHolding) -> None
@@ -89,6 +90,7 @@ class NbImporter(StagedInterface):
         ssList = SnapshotList(security)
         snapshot = ssList.getSnapshotForDate(effectiveDate)  # type: CurrencySnapshot
         oldPrice = convRateToPrice(snapshot.getRate(), price) if snapshot else Decimal("1")
+        MdUtil.validateCurrentUserRate(security, snapshot)
 
         # store this quote if it differs, and we don't already have this security
         if (not snapshot or effectiveDate != snapshot.getDateInt()
@@ -101,8 +103,7 @@ class NbImporter(StagedInterface):
                     HTMLPane.getSpanCl(price, oldPrice),
                     (price / oldPrice - 1).scaleb(2)))
 
-            self.addHandler(SecurityHandler(security, ssList.getLatestSnapshot())
-                            .storeNewPrice(price, effectiveDate))
+            self.addHandler(SecurityHandler(ssList).storeNewPrice(price, effectiveDate))
             self.numPricesSet += 1
     # end storePriceQuoteIfDiff(CurrencyType, NbHolding)
 
