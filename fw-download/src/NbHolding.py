@@ -1,13 +1,13 @@
 # Represent Moneydance security holdings details
+import locale
 from datetime import date
 from decimal import Decimal, ROUND_HALF_EVEN
-
-from Currency import Currency
 
 
 class NbHolding(object):
     """Houses details for a holding"""
 
+    _currencySymbol: str | None = None
     _PREC2 = Decimal("0.00")
     _PREC6 = Decimal("0.000000")
     _PREC7 = Decimal("0.0000000")
@@ -19,11 +19,27 @@ class NbHolding(object):
               "TARGETRETIREMENT2040": ("NON40OJGZ", _PREC7),
               "TOTAL BOND MARKET"   : ("NON40OJFC", _PREC7)}
 
+    @staticmethod
+    def currencySymbol() -> str:
+        if not NbHolding._currencySymbol:
+            NbHolding._currencySymbol = locale.localeconv()["currency_symbol"]
+
+        return NbHolding._currencySymbol
+    # end currencySymbol()
+
+    @staticmethod
+    def asDecimal(valString: str) -> Decimal:
+        stripedVal = locale.delocalize(valString)
+        stripedVal = stripedVal.replace(NbHolding.currencySymbol(), "")
+
+        return Decimal(stripedVal)
+    # end asDecimal(str)
+
     def __init__(self, name: str, dataDict: dict[str, str], effDate: date) -> None:
         self.name: str = name
         self.ticker, self.prec = NbHolding._TICKR[name]
-        self.bal = Decimal(Currency.delocalize(dataDict["Current Balance ($)"]))
-        self.shares = Decimal(Currency.delocalize(dataDict["Shares or Units"]))
+        self.bal = self.asDecimal(dataDict["Current Balance ($)"])
+        self.shares = self.asDecimal(dataDict["Shares or Units"])
         self.eDate: date = effDate
     # end __init__(str, dict[str, str], date)
 
