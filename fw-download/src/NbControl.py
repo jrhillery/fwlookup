@@ -2,7 +2,7 @@
 import logging
 from datetime import date, datetime, timedelta
 from http.client import HTTPConnection
-from typing import Iterator, List, Optional, Self
+from typing import Iterator, Self
 
 from selenium import webdriver
 from selenium.common import WebDriverException
@@ -102,14 +102,14 @@ class NbControl(object):
             # lookup data for holdings
             ifXcptionMsg = "Unable to find holdings table"
             hTbl: WebElement = self.webDriver.find_element(By.ID, "holdingsTable")
-            tHdrs: List[str] = [hdr.text for hdr in hTbl.find_elements(By.CSS_SELECTOR,
+            tHdrs: list[str] = [hdr.text for hdr in hTbl.find_elements(By.CSS_SELECTOR,
                 "thead > tr > th")]
             bodyRows: Iterator[WebElement] = iter(hTbl.find_elements(By.CSS_SELECTOR,
                 "tbody > tr"))
 
             # yield a holding for each pair of rows
             ifXcptionMsg = "Unable to find holdings data"
-            nRow: Optional[WebElement] = next(bodyRows, None)
+            nRow: WebElement | None = next(bodyRows, None)
             while nRow:
                 hldnName: str = nRow.find_element(By.TAG_NAME, "a").text
                 dataDict = {ky: dat.text for ky, dat in
@@ -126,7 +126,7 @@ class NbControl(object):
         return self
     # end __enter__()
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> Optional[bool]:
+    def __exit__(self, exc_type, exc_val, exc_tb) -> bool | None:
         """Release any resources we acquired."""
         if self.webDriver:
             self.webDriver.quit()

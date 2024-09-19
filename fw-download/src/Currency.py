@@ -4,8 +4,6 @@ from collections import deque
 from decimal import Decimal, ROUND_HALF_EVEN
 from logging.config import dictConfig
 
-from typing import Optional
-
 
 class Currency(object):
     _CURRENCY_SYMBOL = "$"
@@ -32,7 +30,7 @@ class Currency(object):
     # end delocalize(str)
 
     @staticmethod
-    def format(value: Decimal, model: Optional[Decimal]=None) -> str:
+    def format(value: Decimal, model: Decimal | None=None) -> str:
         """Format currency with the number of fraction digits in 'model'"""
         if model:
             value = value.quantize(model, ROUND_HALF_EVEN)
@@ -66,7 +64,7 @@ class Currency(object):
                           else Currency._POSITIVE_SIGN)
 
         return "".join(result)
-    # end format(Decimal, Optional[Decimal])
+    # end format(Decimal, Decimal | None)
 
 # end class Currency
 
