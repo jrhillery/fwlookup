@@ -1,7 +1,9 @@
 # Use Selenium web driver to launch and control a browser session
+import __main__
 import logging
 from datetime import date, datetime, timedelta
 from http.client import HTTPConnection
+from pathlib import Path
 from typing import Iterator, Self
 
 from selenium import webdriver
@@ -31,7 +33,7 @@ class NbControl(object):
         try:
             conn = HTTPConnection(self.CHROME_DEBUGGER_ADDRESS)
             conn.connect()
-            logging.error("Connecting to existing browser")
+            logging.error("Connecting to existing browser.")
             autoStartBrowser = False
         except IOError as e:
             msg: list[str] = ["Starting new browser"]
@@ -40,6 +42,7 @@ class NbControl(object):
                 msg.append(" (existing: ")
                 msg.append(str(e))
                 msg.append(")")
+            msg.append(".")
             logging.error("".join(msg))
             autoStartBrowser = True
         finally:
@@ -82,7 +85,7 @@ class NbControl(object):
             link = WebDriverWait(self.webDriver, timeout=8) \
                 .until(expected_conditions.element_to_be_clickable((By.CSS_SELECTOR,
                     "#holdings-section .show-details-link")))
-            logging.info(f"FWIMP01: Obtaining price data from {self.webDriver.title}.")
+            logging.info(f"Obtaining price data from {self.webDriver.title}.")
             self.webDriver.execute_script("arguments[0].click();", link)
 
             return True
@@ -130,7 +133,7 @@ class NbControl(object):
         """Release any resources we acquired."""
         if self.webDriver:
             self.webDriver.quit()
-            logging.info("%s closed.", self.webDriver.name)
+            logging.info("%s WebDriver closed.", self.webDriver.name)
 
         return None
     # end __exit__(Type[BaseException] | None, BaseException | None, TracebackType | None)
@@ -142,14 +145,18 @@ class NbControl(object):
     # end reportError(str, WebDriverException)
 
     def main(self) -> None:
-        logging.info("Downloading quote data from NetBenefits.")
+        logging.info("Preparing to download price data from NetBenefits.")
 
-        with self.getHoldingsDriver(), self:
+        with self:
+            self.getHoldingsDriver()
+
             if self.navigateToHoldingsDetails():
                 for hldn in self.getHoldings():
                     logging.info(str(hldn))
                 # end for each holding
         # end with
+
+        logging.info(f"Exiting {Path(__main__.__file__).stem}.")
     # end main()
 
 # end class NbControl
