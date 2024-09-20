@@ -1,9 +1,7 @@
 # Use Selenium web driver to launch and control a browser session
-import __main__
 import logging
 from datetime import date, datetime, timedelta
 from http.client import HTTPConnection
-from pathlib import Path
 from typing import Iterator, Self
 
 from selenium import webdriver
@@ -143,20 +141,5 @@ class NbControl(object):
         logging.error(f"{txtMsg}:/n{xcption}")
         logging.debug(f"{xcption.__class__.__name__} suppressed:", exc_info=xcption)
     # end reportError(str, WebDriverException)
-
-    def main(self) -> None:
-        logging.info("Preparing to download price data from NetBenefits.")
-
-        with self:
-            self.getHoldingsDriver()
-
-            if self.navigateToHoldingsDetails():
-                for hldn in self.getHoldings():
-                    logging.info(str(hldn))
-                # end for each holding
-        # end with
-
-        logging.info(f"Exiting {Path(__main__.__file__).stem}.")
-    # end main()
 
 # end class NbControl
