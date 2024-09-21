@@ -3,10 +3,13 @@ import __main__
 import locale
 import logging
 from configparser import ConfigParser
+from csv import DictWriter
 from itertools import chain
 from pathlib import Path
+from typing import Iterator
 
 from NbControl import NbControl
+from NbHolding import NbHolding
 from util import Configure
 
 
@@ -14,6 +17,8 @@ class FwDownload(object):
 
     def __init__(self):
         self.csvProps: dict[str, str] | None = None
+
+    # end __init__()
 
     def getCsvProps(self) -> dict[str, str]:
         """Retrieve the CSV properties"""
@@ -32,6 +37,43 @@ class FwDownload(object):
         return self.csvProps
     # end getCsvProps()
 
+    def writeCsv(self, hldnItr: Iterator[NbHolding]) -> None:
+        cp = self.getCsvProps()
+
+        with open("NbPrices.csv", "w", newline="") as csvFile:
+            writer = DictWriter(csvFile, fieldnames=())
+
+            for i, hldn in enumerate(hldnItr):
+                logging.info(str(hldn))
+                row = {cp["col.account.num"]: "30200",
+                       cp["col.ticker"]:      hldn.ticker,
+                       cp["col.name"]:        hldn.name,
+                       cp["col.shares"]:      hldn.shares,
+                       cp["col.price"]:       hldn.getPrice(),
+                       cp["col.value"]:       hldn.bal,
+                       cp["col.date"]:        hldn.eDate}
+
+                if i == 0:
+                    writer.fieldnames = row.keys()
+                    writer.writeheader()
+                writer.writerow(row)
+            # end for each holding
+        # end with csv file
+        logging.info(f"Wrote {i + 1} holdings to {csvFile.name}")
+
+    # end writeCsv(Iterator[NbHolding])
+
+    def downloadHoldings(self) -> None:
+
+        with NbControl() as nbCtl:
+            nbCtl.getHoldingsDriver()
+
+            if nbCtl.navigateToHoldingsDetails():
+                self.writeCsv(nbCtl.getHoldings())
+        # end with nb control
+
+    # end downloadHoldings()
+
 # end class FwDownload
 
 
@@ -42,15 +84,7 @@ if __name__ == "__main__":
 
     try:
         fw = FwDownload()
-
-        with NbControl() as nbCtl:
-            nbCtl.getHoldingsDriver()
-
-            if nbCtl.navigateToHoldingsDetails():
-                for hldn in nbCtl.getHoldings():
-                    logging.info(str(hldn))
-                # end for each holding
-        # end with
+        fw.downloadHoldings()
     except Exception as xcption:
         logging.error(xcption)
         logging.debug(f"{xcption.__class__.__name__} suppressed:", exc_info=xcption)
