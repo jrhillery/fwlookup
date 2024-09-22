@@ -6,10 +6,8 @@ from configparser import ConfigParser
 from csv import DictWriter
 from itertools import chain
 from pathlib import Path
-from typing import Iterator
 
 from NbControl import NbControl
-from NbHolding import NbHolding
 from util import Configure
 
 
@@ -23,10 +21,10 @@ class FwDownload(object):
     def getCsvProps(self) -> dict[str, str]:
         """Retrieve the CSV properties"""
         if not self.csvProps:
-            rp = Path("resources")
+            props = Path("resources", "fw-import")
             cParser = ConfigParser()
 
-            with open(rp.joinpath("fw-import").with_suffix(".properties")) as lines:
+            with open(props.with_suffix(".properties")) as lines:
                 # Python 3.12 ConfigParser requires a section header, so prepend one named {}
                 lines = chain(("[{}]", ), lines)
                 cParser.read_file(lines)
@@ -37,13 +35,14 @@ class FwDownload(object):
         return self.csvProps
     # end getCsvProps()
 
-    def writeCsv(self, hldnItr: Iterator[NbHolding]) -> None:
+    def writeCsv(self, nbCtl: NbControl) -> None:
         cp = self.getCsvProps()
+        outFn = Path.home().joinpath("Downloads", f"NbPosition{nbCtl.effectiveDate}")
 
-        with open("NbPrices.csv", "w", newline="") as csvFile:
+        with open(outFn.with_suffix(".csv"), "w", newline="") as csvFile:
             writer = DictWriter(csvFile, fieldnames=())
 
-            for i, hldn in enumerate(hldnItr):
+            for i, hldn in enumerate(nbCtl.getHoldings()):
                 logging.info(str(hldn))
                 row = {cp["col.account.num"]: "30200",
                        cp["col.ticker"]:      hldn.ticker,
@@ -61,7 +60,7 @@ class FwDownload(object):
         # end with csv file
         logging.info(f"Wrote {i + 1} holdings to {csvFile.name}")
 
-    # end writeCsv(Iterator[NbHolding])
+    # end writeCsv(NbControl)
 
     def downloadHoldings(self) -> None:
 
@@ -69,7 +68,7 @@ class FwDownload(object):
             nbCtl.getHoldingsDriver()
 
             if nbCtl.navigateToHoldingsDetails():
-                self.writeCsv(nbCtl.getHoldings())
+                self.writeCsv(nbCtl)
         # end with nb control
 
     # end downloadHoldings()

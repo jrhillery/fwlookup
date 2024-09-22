@@ -23,6 +23,7 @@ class NbControl(object):
 
     def __init__(self):
         self.webDriver: WebDriver | None = None
+        self.effectiveDate: date = date.today()
     # end __init__()
 
     def getHoldingsDriver(self) -> WebDriver:
@@ -86,6 +87,12 @@ class NbControl(object):
             logging.info(f"Obtaining price data from {self.webDriver.title}.")
             self.webDriver.execute_script("arguments[0].click();", link)
 
+            # lookup effective date
+            ifXcptionMsg = "Unable to find effective date"
+            dateShown = self.webDriver.find_element(By.ID, "modal-header--holdings") \
+                .find_element(By.XPATH, "./following-sibling::*").text
+            self.effectiveDate = datetime.strptime(dateShown, "Data as of %m/%d/%y").date()
+
             return True
         except WebDriverException as e:
             self.reportError(ifXcptionMsg, e)
@@ -93,15 +100,9 @@ class NbControl(object):
 
     def getHoldings(self) -> Iterator[NbHolding]:
         """Generate NetBenefits holdings and their current values"""
-        ifXcptionMsg = "Unable to find effective date"
+        ifXcptionMsg = "Unable to find holdings table"
         try:
-            # lookup effective date
-            dateShown = self.webDriver.find_element(By.ID, "modal-header--holdings") \
-                .find_element(By.XPATH, "./following-sibling::*").text
-            eDate: date = datetime.strptime(dateShown, "Data as of %m/%d/%y").date()
-
             # lookup data for holdings
-            ifXcptionMsg = "Unable to find holdings table"
             hTbl: WebElement = self.webDriver.find_element(By.ID, "holdingsTable")
             tHdrs: list[str] = [hdr.text for hdr in hTbl.find_elements(By.CSS_SELECTOR,
                 "thead > tr > th")]
@@ -116,7 +117,7 @@ class NbControl(object):
                 dataDict = {ky: dat.text for ky, dat in
                             zip(tHdrs, next(bodyRows).find_elements(By.TAG_NAME, "td"))}
 
-                yield NbHolding(hldnName, dataDict, eDate)
+                yield NbHolding(hldnName, dataDict, self.effectiveDate)
                 nRow = next(bodyRows, None)
             # end while nRow
         except WebDriverException as e:
