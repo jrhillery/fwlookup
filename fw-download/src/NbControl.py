@@ -21,6 +21,11 @@ class NbControl(object):
     CHROME_USER_DATA = "user-data-dir=C:/Users/John/.local/Chrome/User Data"
     CHROME_DEBUGGER_ADDRESS = "localhost:14001"
     NB_LOG_IN = "https://nb.fidelity.com/public/nb/default/home"
+    PLUS_PLAN_LINK = By.LINK_TEXT, "IBM 401(K) PLAN"
+    SHOW_DETAILS_LINK = By.CSS_SELECTOR, "#holdings-section .show-details-link"
+    HOLDINGS_HEADER_LOCATOR = By.ID, "modal-header--holdings"
+    FOLLOWING_SIBLING_LOCATOR = By.XPATH, "./following-sibling::*"
+    HOLDINGS_TABLE_LOCATOR = By.ID, "holdingsTable"
     FIDELITY_LOGOUT_LOCATOR = By.CSS_SELECTOR, "h1#content-body-top-heading-tcm\\:526-223203"
     NETBENEFITS_LOGOUT_LOCATOR = By.CSS_SELECTOR, "h1#dom-login-header"
 
@@ -75,9 +80,8 @@ class NbControl(object):
 
             # wait for user to log-in
             ifXcptionMsg = "Timed out waiting for log-in"
-            plusPlanLink = By.LINK_TEXT, "IBM 401(K) PLAN"
             link = WebDriverWait(self.webDriver, timeout=timedelta(minutes=5).seconds) \
-                .until(element_to_be_clickable(plusPlanLink))
+                .until(element_to_be_clickable(NbControl.PLUS_PLAN_LINK))
             self.loggedIn = True
 
             # select 401(k) Plus Plan link
@@ -87,15 +91,14 @@ class NbControl(object):
             # render holdings details
             ifXcptionMsg = "Timed out waiting for holdings page"
             link = WebDriverWait(self.webDriver, timeout=8) \
-                .until(element_to_be_clickable((By.CSS_SELECTOR,
-                    "#holdings-section .show-details-link")))
+                .until(element_to_be_clickable(NbControl.SHOW_DETAILS_LINK))
             logging.info(f"Obtaining price data from {self.webDriver.title}.")
             self.webDriver.execute_script("arguments[0].click();", link)
 
             # lookup effective date
             ifXcptionMsg = "Unable to find effective date"
-            dateShown = self.webDriver.find_element(By.ID, "modal-header--holdings") \
-                .find_element(By.XPATH, "./following-sibling::*").text
+            dateShown = self.webDriver.find_element(*NbControl.HOLDINGS_HEADER_LOCATOR) \
+                .find_element(*NbControl.FOLLOWING_SIBLING_LOCATOR).text
             self.effectiveDate = datetime.strptime(dateShown, "Data as of %m/%d/%y").date()
 
             return True
@@ -108,11 +111,11 @@ class NbControl(object):
         ifXcptionMsg = "Unable to find holdings table"
         try:
             # lookup data for holdings
-            hTbl: WebElement = self.webDriver.find_element(By.ID, "holdingsTable")
-            tHdrs: list[str] = [hdr.text for hdr in hTbl.find_elements(By.CSS_SELECTOR,
-                "thead > tr > th")]
-            bodyRows: Iterator[WebElement] = iter(hTbl.find_elements(By.CSS_SELECTOR,
-                "tbody > tr"))
+            hTbl: WebElement = self.webDriver.find_element(*NbControl.HOLDINGS_TABLE_LOCATOR)
+            tHdrs: list[str] = [hdr.text for hdr in
+                hTbl.find_elements(By.CSS_SELECTOR, "thead > tr > th")]
+            bodyRows: Iterator[WebElement] = iter(
+                hTbl.find_elements(By.CSS_SELECTOR, "tbody > tr"))
 
             # yield a holding for each pair of rows
             ifXcptionMsg = "Unable to find holdings data"
@@ -120,7 +123,7 @@ class NbControl(object):
             while nRow:
                 hldnName: str = nRow.find_element(By.TAG_NAME, "a").text
                 dataDict = {ky: dat.text for ky, dat in
-                            zip(tHdrs, next(bodyRows).find_elements(By.TAG_NAME, "td"))}
+                    zip(tHdrs, next(bodyRows).find_elements(By.TAG_NAME, "td"))}
 
                 yield NbHolding(hldnName, dataDict, self.effectiveDate)
                 nRow = next(bodyRows, None)
