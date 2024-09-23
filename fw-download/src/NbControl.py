@@ -36,6 +36,7 @@ class NbControl(object):
         self.pageDrawWait: WebDriverWait | None = None
         self.logoutWait: WebDriverWait | None = None
         self.loggedIn = False
+        self.planId: str | None = None
         self.effectiveDate: date = date.today()
     # end __init__()
 
@@ -50,9 +51,7 @@ class NbControl(object):
             msg: list[str] = ["Starting new browser"]
 
             if e.errno != 10061:  # Suppress common case details: Connection refused
-                msg.append(" (existing: ")
-                msg.append(str(e))
-                msg.append(")")
+                msg.append(f" (existing: {str(e)})")
             msg.append(".")
             logging.error("".join(msg))
             self.autoStartBrowser = True
@@ -98,6 +97,9 @@ class NbControl(object):
             link = self.pageDrawWait.until(element_to_be_clickable(NbControl.DETAILS_LINK))
             logging.info(f"Obtaining price data from {self.webDriver.title}.")
             self.webDriver.execute_script("arguments[0].click();", link)
+
+            # lookup plan identifier
+            self.planId = self.webDriver.execute_script("return planId")
 
             # lookup effective date
             ifXcptionMsg = "Unable to find effective date"

@@ -44,7 +44,7 @@ class FwDownload(object):
 
             for i, hldn in enumerate(nbCtl.getHoldings()):
                 logging.info(str(hldn))
-                row = {cp["col.account.num"]: "30200",
+                row = {cp["col.account.num"]: nbCtl.planId,
                        cp["col.ticker"]:      hldn.ticker,
                        cp["col.name"]:        hldn.name,
                        cp["col.shares"]:      hldn.shares,
