@@ -9,7 +9,8 @@ from selenium.common import WebDriverException
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.expected_conditions import (
+    any_of, element_to_be_clickable, visibility_of_element_located)
 from selenium.webdriver.support.wait import WebDriverWait
 
 from NbHolding import NbHolding
@@ -20,9 +21,13 @@ class NbControl(object):
     CHROME_USER_DATA = "user-data-dir=C:/Users/John/.local/Chrome/User Data"
     CHROME_DEBUGGER_ADDRESS = "localhost:14001"
     NB_LOG_IN = "https://nb.fidelity.com/public/nb/default/home"
+    FIDELITY_LOGOUT_LOCATOR = By.CSS_SELECTOR, "h1#content-body-top-heading-tcm\\:526-223203"
+    NETBENEFITS_LOGOUT_LOCATOR = By.CSS_SELECTOR, "h1#dom-login-header"
 
     def __init__(self):
+        self.autoStartBrowser = False
         self.webDriver: WebDriver | None = None
+        self.loggedIn = False
         self.effectiveDate: date = date.today()
     # end __init__()
 
@@ -33,7 +38,6 @@ class NbControl(object):
             conn = HTTPConnection(self.CHROME_DEBUGGER_ADDRESS)
             conn.connect()
             logging.error("Connecting to existing browser.")
-            autoStartBrowser = False
         except IOError as e:
             msg: list[str] = ["Starting new browser"]
 
@@ -43,7 +47,7 @@ class NbControl(object):
                 msg.append(")")
             msg.append(".")
             logging.error("".join(msg))
-            autoStartBrowser = True
+            self.autoStartBrowser = True
         finally:
             if conn is not None:
                 conn.close()
@@ -52,7 +56,7 @@ class NbControl(object):
         try:
             crOpts = webdriver.ChromeOptions()
 
-            if autoStartBrowser:
+            if self.autoStartBrowser:
                 crOpts.add_argument(NbControl.CHROME_USER_DATA)
             else:
                 crOpts.add_experimental_option("debuggerAddress", self.CHROME_DEBUGGER_ADDRESS)
@@ -73,7 +77,8 @@ class NbControl(object):
             ifXcptionMsg = "Timed out waiting for log-in"
             plusPlanLink = By.LINK_TEXT, "IBM 401(K) PLAN"
             link = WebDriverWait(self.webDriver, timeout=timedelta(minutes=5).seconds) \
-                .until(expected_conditions.element_to_be_clickable(plusPlanLink))
+                .until(element_to_be_clickable(plusPlanLink))
+            self.loggedIn = True
 
             # select 401(k) Plus Plan link
             ifXcptionMsg = "Unable to select 401(k) Plus Plan"
@@ -82,7 +87,7 @@ class NbControl(object):
             # render holdings details
             ifXcptionMsg = "Timed out waiting for holdings page"
             link = WebDriverWait(self.webDriver, timeout=8) \
-                .until(expected_conditions.element_to_be_clickable((By.CSS_SELECTOR,
+                .until(element_to_be_clickable((By.CSS_SELECTOR,
                     "#holdings-section .show-details-link")))
             logging.info(f"Obtaining price data from {self.webDriver.title}.")
             self.webDriver.execute_script("arguments[0].click();", link)
@@ -124,6 +129,19 @@ class NbControl(object):
             self.reportError(ifXcptionMsg, e)
     # end getHoldings()
 
+    def waitForLogout(self) -> None:
+        ifXcptionMsg = "Timed out waiting for log-out"
+        try:
+            # wait for user to log-out
+            logging.info("Waiting for log-out")
+            WebDriverWait(self.webDriver, timeout=timedelta(minutes=30).seconds).until(any_of(
+                visibility_of_element_located(NbControl.FIDELITY_LOGOUT_LOCATOR),
+                visibility_of_element_located(NbControl.NETBENEFITS_LOGOUT_LOCATOR)))
+        except WebDriverException as e:
+            self.reportError(ifXcptionMsg, e)
+
+    # end waitForLogout()
+
     def __enter__(self) -> Self:
         return self
     # end __enter__()
@@ -139,7 +157,7 @@ class NbControl(object):
 
     @staticmethod
     def reportError(txtMsg: str, xcption: WebDriverException) -> None:
-        logging.error(f"{txtMsg}:/n{xcption}")
+        logging.error(f"{txtMsg}:\n{xcption.msg}")
         logging.debug(f"{xcption.__class__.__name__} suppressed:", exc_info=xcption)
     # end reportError(str, WebDriverException)
 

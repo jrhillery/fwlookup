@@ -69,6 +69,9 @@ class FwDownload(object):
 
             if nbCtl.navigateToHoldingsDetails():
                 self.writeCsv(nbCtl)
+
+            if nbCtl.autoStartBrowser and nbCtl.loggedIn:
+                nbCtl.waitForLogout()
         # end with nb control
 
     # end downloadHoldings()
