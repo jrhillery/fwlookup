@@ -22,7 +22,7 @@ class NbControl(object):
     CHROME_DEBUGGER_ADDRESS = "localhost:14001"
     NB_LOG_IN = "https://nb.fidelity.com/public/nb/default/home"
     PLUS_PLAN_LINK = By.LINK_TEXT, "IBM 401(K) PLAN"
-    SHOW_DETAILS_LINK = By.CSS_SELECTOR, "#holdings-section .show-details-link"
+    DETAILS_LINK = By.CSS_SELECTOR, "#holdings-section .show-details-link"
     HOLDINGS_HEADER_LOCATOR = By.ID, "modal-header--holdings"
     FOLLOWING_SIBLING_LOCATOR = By.XPATH, "./following-sibling::*"
     HOLDINGS_TABLE_LOCATOR = By.ID, "holdingsTable"
@@ -32,6 +32,9 @@ class NbControl(object):
     def __init__(self):
         self.autoStartBrowser = False
         self.webDriver: WebDriver | None = None
+        self.loginWait: WebDriverWait | None = None
+        self.pageDrawWait: WebDriverWait | None = None
+        self.logoutWait: WebDriverWait | None = None
         self.loggedIn = False
         self.effectiveDate: date = date.today()
     # end __init__()
@@ -66,6 +69,9 @@ class NbControl(object):
             else:
                 crOpts.add_experimental_option("debuggerAddress", self.CHROME_DEBUGGER_ADDRESS)
             self.webDriver = webdriver.Chrome(options=crOpts)
+            self.loginWait = WebDriverWait(self.webDriver, timedelta(minutes=5).seconds)
+            self.pageDrawWait = WebDriverWait(self.webDriver, 8)
+            self.logoutWait = WebDriverWait(self.webDriver, timedelta(minutes=30).seconds)
 
             return self.webDriver
         except WebDriverException as e:
@@ -80,8 +86,7 @@ class NbControl(object):
 
             # wait for user to log-in
             ifXcptionMsg = "Timed out waiting for log-in"
-            link = WebDriverWait(self.webDriver, timeout=timedelta(minutes=5).seconds) \
-                .until(element_to_be_clickable(NbControl.PLUS_PLAN_LINK))
+            link = self.loginWait.until(element_to_be_clickable(NbControl.PLUS_PLAN_LINK))
             self.loggedIn = True
 
             # select 401(k) Plus Plan link
@@ -90,8 +95,7 @@ class NbControl(object):
 
             # render holdings details
             ifXcptionMsg = "Timed out waiting for holdings page"
-            link = WebDriverWait(self.webDriver, timeout=8) \
-                .until(element_to_be_clickable(NbControl.SHOW_DETAILS_LINK))
+            link = self.pageDrawWait.until(element_to_be_clickable(NbControl.DETAILS_LINK))
             logging.info(f"Obtaining price data from {self.webDriver.title}.")
             self.webDriver.execute_script("arguments[0].click();", link)
 
@@ -137,7 +141,7 @@ class NbControl(object):
         try:
             # wait for user to log-out
             logging.info("Waiting for log-out")
-            WebDriverWait(self.webDriver, timeout=timedelta(minutes=30).seconds).until(any_of(
+            self.logoutWait.until(any_of(
                 visibility_of_element_located(NbControl.FIDELITY_LOGOUT_LOCATOR),
                 visibility_of_element_located(NbControl.NETBENEFITS_LOGOUT_LOCATOR)))
         except WebDriverException as e:
