@@ -145,10 +145,8 @@ class FwLookupConsole(JFrame):
 
 if __name__ == "__main__":
     frame = FwLookupConsole("FW Lookup Title", None)  # type: FwLookupConsole
-    # noinspection SpellCheckingInspection
     frame.addText("Change Eaton Vance Equity Inc (ETY) price for today from $14.00 to "
                   "$14.23 (<span class='incrs'>+1.64%</span>).")
-    # noinspection SpellCheckingInspection
     frame.addText("Change IBM Common Stock (IBM) price for today from "
                   "$119.00 to $118.84 (<span class='decrs'>-0.13%</span>).")
     frame.enableCommitButton(True)
