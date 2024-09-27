@@ -1,12 +1,23 @@
 <component name="ProjectDictionaryState">
   <dictionary name="John">
     <words>
+      <w>accesstoken</w>
+      <w>asctime</w>
+      <w>circuitmapping</w>
+      <w>compl</w>
+      <w>datefmt</w>
+      <w>derated</w>
       <w>hdrs</w>
       <w>hldn</w>
+      <w>intrfc</w>
+      <w>levelname</w>
+      <w>msecs</w>
       <w>netbenefits</w>
+      <w>parms</w>
       <w>prec</w>
       <w>tbody</w>
       <w>thead</w>
+      <w>xcpt</w>
       <w>xcption</w>
     </words>
   </dictionary>

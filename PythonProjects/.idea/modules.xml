@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/PythonProjects.iml" filepath="$PROJECT_DIR$/PythonProjects.iml" />
+      <module fileurl="file://$PROJECT_DIR$/car-projects.iml" filepath="$PROJECT_DIR$/car-projects.iml" />
       <module fileurl="file://$PROJECT_DIR$/fw-download.iml" filepath="$PROJECT_DIR$/fw-download.iml" />
     </modules>
   </component>
