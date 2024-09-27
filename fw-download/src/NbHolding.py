@@ -1,4 +1,4 @@
-# Represent Moneydance security holdings details
+# Represent NetBenefits security holdings details
 import locale
 from datetime import date
 from decimal import Decimal, ROUND_HALF_EVEN
