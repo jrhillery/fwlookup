@@ -143,7 +143,7 @@ class NbControl(object):
         ifXcptionMsg = "Timed out waiting for log-out"
         try:
             # wait for user to log-out
-            logging.info("Waiting for log-out")
+            logging.info("Waiting for log-out.")
             self.logoutWait.until(any_of(
                 visibility_of_element_located(NbControl.FIDELITY_LOGOUT_LOCATOR),
                 visibility_of_element_located(NbControl.NETBENEFITS_LOGOUT_LOCATOR)))

@@ -58,7 +58,7 @@ class FwDownload(object):
                 writer.writerow(row)
             # end for each holding
         # end with csv file
-        logging.info(f"Wrote {i + 1} holdings to {csvFile.name}")
+        logging.info(f"Wrote {i + 1} holdings to {csvFile.name}.")
 
     # end writeCsv(NbControl)
 
