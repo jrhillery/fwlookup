@@ -46,14 +46,14 @@ class NbControl(object):
         try:
             conn = HTTPConnection(self.CHROME_DEBUGGER_ADDRESS)
             conn.connect()
-            logging.error("Connecting to existing browser.")
+            logging.info("Connecting to existing browser.")
         except IOError as e:
             msg: list[str] = ["Starting new browser"]
 
             if e.errno != 10061:  # Suppress common case details: Connection refused
                 msg.append(f" (existing: {str(e)})")
             msg.append(".")
-            logging.error("".join(msg))
+            logging.info("".join(msg))
             self.autoStartBrowser = True
         finally:
             if conn is not None:
