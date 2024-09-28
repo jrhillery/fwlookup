@@ -65,6 +65,7 @@ class NbControl(object):
 
             if self.autoStartBrowser:
                 crOpts.add_argument(NbControl.CHROME_USER_DATA)
+                crOpts.add_experimental_option("excludeSwitches", ["enable-logging"])
             else:
                 crOpts.add_experimental_option("debuggerAddress", self.CHROME_DEBUGGER_ADDRESS)
             self.webDriver = webdriver.Chrome(options=crOpts)
