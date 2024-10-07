@@ -1,8 +1,9 @@
 # Use Selenium web driver to launch and control a browser session
 import logging
+from contextlib import AbstractContextManager
 from datetime import date, datetime, timedelta
 from http.client import HTTPConnection
-from typing import Iterator, Self
+from typing import Iterator
 
 from selenium import webdriver
 from selenium.common import WebDriverException
@@ -16,7 +17,19 @@ from selenium.webdriver.support.wait import WebDriverWait
 from NbHolding import NbHolding
 
 
-class NbControl(object):
+class NbException(Exception):
+    """Class for handled exceptions"""
+
+    @classmethod
+    def fromXcp(cls, unableMsg: str, xcption: WebDriverException):
+        """Factory method for WebDriverExceptions"""
+        return cls(f"Unable to {unableMsg}, {xcption.__class__.__name__}: {xcption.msg}")
+    # end fromXcp(str, WebDriverException)
+
+# end class NbException
+
+
+class NbControl(AbstractContextManager["NbControl"]):
     """Controls browsing NetBenefits web pages"""
     CHROME_USER_DATA = "user-data-dir=C:/Users/John/.local/Chrome/User Data"
     CHROME_DEBUGGER_ADDRESS = "localhost:14001"
@@ -75,47 +88,46 @@ class NbControl(object):
 
             return self.webDriver
         except WebDriverException as e:
-            self.reportError("Unable to open browser with " + NbControl.CHROME_USER_DATA, e)
+            raise NbException.fromXcp("open browser with " + NbControl.CHROME_USER_DATA, e) from e
     # end getHoldingsDriver()
 
     def navigateToHoldingsDetails(self) -> bool:
-        ifXcptionMsg = "Unable to open log-in page " + NbControl.NB_LOG_IN
+        ifXcptionMsg = "open log-in page " + NbControl.NB_LOG_IN
         try:
             # open NetBenefits log-in page
             self.webDriver.get(NbControl.NB_LOG_IN)
 
             # wait for user to log-in
-            ifXcptionMsg = "Timed out waiting for log-in"
-            link = self.loginWait.until(element_to_be_clickable(NbControl.PLUS_PLAN_LINK))
+            ifXcptionMsg = "log-in"
+            link = self.loginWait.until(element_to_be_clickable(NbControl.PLUS_PLAN_LINK),
+                                        "Timed out waiting to log-in")
             self.loggedIn = True
 
-            # select 401(k) Plus Plan link
-            ifXcptionMsg = "Unable to select 401(k) Plus Plan"
+            ifXcptionMsg = "select 401(k) Plus Plan link"
             self.webDriver.execute_script("arguments[0].click();", link)
 
-            # render holdings details
-            ifXcptionMsg = "Timed out waiting for holdings page"
-            link = self.pageDrawWait.until(element_to_be_clickable(NbControl.DETAILS_LINK))
+            ifXcptionMsg = "render holdings details"
+            link = self.pageDrawWait.until(element_to_be_clickable(NbControl.DETAILS_LINK),
+                                           "Timed out waiting for holdings page")
             logging.info(f"Obtaining price data from {self.webDriver.title}.")
             self.webDriver.execute_script("arguments[0].click();", link)
 
             # lookup plan identifier
             self.planId = self.webDriver.execute_script("return planId")
 
-            # lookup effective date
-            ifXcptionMsg = "Unable to find effective date"
+            ifXcptionMsg = "find effective date"
             dateShown = self.webDriver.find_element(*NbControl.HOLDINGS_HEADER_LOCATOR) \
                 .find_element(*NbControl.FOLLOWING_SIBLING_LOCATOR).text
             self.effectiveDate = datetime.strptime(dateShown, "Data as of %m/%d/%y").date()
 
             return True
         except WebDriverException as e:
-            self.reportError(ifXcptionMsg, e)
+            raise NbException.fromXcp(ifXcptionMsg, e) from e
     # end navigateToHoldingDetails()
 
     def getHoldings(self) -> Iterator[NbHolding]:
         """Generate NetBenefits holdings and their current values"""
-        ifXcptionMsg = "Unable to find holdings table"
+        ifXcptionMsg = "find holdings table"
         try:
             # lookup data for holdings
             hTbl: WebElement = self.webDriver.find_element(*NbControl.HOLDINGS_TABLE_LOCATOR)
@@ -125,7 +137,7 @@ class NbControl(object):
                 hTbl.find_elements(By.CSS_SELECTOR, "tbody > tr"))
 
             # yield a holding for each pair of rows
-            ifXcptionMsg = "Unable to find holdings data"
+            ifXcptionMsg = "find holdings data"
             nRow: WebElement | None = next(bodyRows, None)
             while nRow:
                 hldnName: str = nRow.find_element(By.TAG_NAME, "a").text
@@ -136,25 +148,22 @@ class NbControl(object):
                 nRow = next(bodyRows, None)
             # end while nRow
         except WebDriverException as e:
-            self.reportError(ifXcptionMsg, e)
+            raise NbException.fromXcp(ifXcptionMsg, e) from e
     # end getHoldings()
 
     def waitForLogout(self) -> None:
-        ifXcptionMsg = "Timed out waiting for log-out"
+        doingMsg = "waiting for log-out"
         try:
             # wait for user to log-out
-            logging.info("Waiting for log-out.")
+            logging.info(doingMsg.capitalize() + ".")
             self.logoutWait.until(any_of(
                 visibility_of_element_located(NbControl.FIDELITY_LOGOUT_LOCATOR),
-                visibility_of_element_located(NbControl.NETBENEFITS_LOGOUT_LOCATOR)))
+                visibility_of_element_located(NbControl.NETBENEFITS_LOGOUT_LOCATOR)),
+                "Timed out waiting for log-out")
         except WebDriverException as e:
-            self.reportError(ifXcptionMsg, e)
+            raise NbException.fromXcp(doingMsg, e) from e
 
     # end waitForLogout()
-
-    def __enter__(self) -> Self:
-        return self
-    # end __enter__()
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> bool | None:
         """Release any resources we acquired."""
@@ -164,11 +173,5 @@ class NbControl(object):
 
         return None
     # end __exit__(Type[BaseException] | None, BaseException | None, TracebackType | None)
-
-    @staticmethod
-    def reportError(txtMsg: str, xcption: WebDriverException) -> None:
-        logging.error(f"{txtMsg}:\n{xcption.msg}")
-        logging.debug(f"{xcption.__class__.__name__} suppressed:", exc_info=xcption)
-    # end reportError(str, WebDriverException)
 
 # end class NbControl
