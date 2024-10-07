@@ -6,7 +6,7 @@ from http.client import HTTPConnection
 from typing import Iterator
 
 from selenium import webdriver
-from selenium.common import WebDriverException
+from selenium.common import NoSuchWindowException, WebDriverException
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
@@ -121,6 +121,10 @@ class NbControl(AbstractContextManager["NbControl"]):
             self.effectiveDate = datetime.strptime(dateShown, "Data as of %m/%d/%y").date()
 
             return True
+        except NoSuchWindowException:
+            logging.info(f"Browser gone ({ifXcptionMsg})")
+
+            return False
         except WebDriverException as e:
             raise NbException.fromXcp(ifXcptionMsg, e) from e
     # end navigateToHoldingDetails()
