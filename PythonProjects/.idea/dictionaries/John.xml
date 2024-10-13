@@ -3,11 +3,14 @@
     <words>
       <w>accesstoken</w>
       <w>asctime</w>
+      <w>batt</w>
       <w>circuitmapping</w>
       <w>compl</w>
       <w>courtlabel</w>
       <w>datefmt</w>
+      <w>derate</w>
       <w>derated</w>
+      <w>dtls</w>
       <w>hdrs</w>
       <w>hldn</w>
       <w>intrfc</w>
