@@ -3,6 +3,7 @@ import logging
 from contextlib import AbstractContextManager
 from datetime import date, datetime, timedelta
 from http.client import HTTPConnection
+from pathlib import Path
 from typing import Iterator
 
 from selenium import webdriver
@@ -31,7 +32,7 @@ class NbException(Exception):
 
 class NbControl(AbstractContextManager["NbControl"]):
     """Controls browsing NetBenefits web pages"""
-    CHROME_USER_DATA = "user-data-dir=C:/Users/John/.local/Chrome/User Data"
+    CHROME_USER_DATA = f"user-data-dir={Path.home().joinpath(".local", "Chrome", "User Data")}"
     CHROME_DEBUGGER_ADDRESS = "localhost:14001"
     NB_LOG_IN = "https://nb.fidelity.com/public/nb/default/home"
     PLUS_PLAN_LINK = By.LINK_TEXT, "IBM 401(K) PLAN"
