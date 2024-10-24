@@ -37,9 +37,10 @@ class FwDownload(object):
 
     def writeCsv(self, nbCtl: NbControl) -> None:
         cp = self.getCsvProps()
-        outFn = Path.home().joinpath("Downloads", f"NbPosition{nbCtl.effectiveDate}")
+        outFn = Path.home().joinpath("Downloads",
+                                     f"NbPosition{nbCtl.effectiveDate}").with_suffix(".csv")
 
-        with open(outFn.with_suffix(".csv"), "w", newline="") as csvFile:
+        with open(outFn, "w", newline="") as csvFile:
             writer = DictWriter(csvFile, fieldnames=())
 
             for i, hldn in enumerate(nbCtl.getHoldings()):
@@ -58,7 +59,7 @@ class FwDownload(object):
                 writer.writerow(row)
             # end for each holding
         # end with csv file
-        logging.info(f"Wrote {i + 1} holdings to {csvFile.name}.")
+        logging.info(f"Wrote {i + 1} holdings to {outFn.name}.")
 
     # end writeCsv(NbControl)
 
