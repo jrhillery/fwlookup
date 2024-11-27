@@ -1,5 +1,6 @@
 # Represent NetBenefits security holdings details
 import locale
+import logging
 from datetime import date
 from decimal import Decimal, ROUND_HALF_EVEN
 
@@ -12,7 +13,8 @@ class NbHolding(object):
     _PREC6 = Decimal("0.000000")
     _PREC7 = Decimal("0.0000000")
     # noinspection SpellCheckingInspection
-    _TICKR = {"HI YLD EMG MKT BOND" : ("NON40OJFI", _PREC6),
+    _TICKR = {"AGGRESSIVE"          : ("NON40OJGH", _PREC7),
+              "HI YLD EMG MKT BOND" : ("NON40OJFI", _PREC6),
               "INFL PROTECTED BOND" : ("NON40OJFB", _PREC7),
               "INTEREST INCOME FUND": ("NON40OJFA", _PREC7),
               "PIM INTL BD US$H I"  : ("PFORX"    , _PREC2),
@@ -37,7 +39,12 @@ class NbHolding(object):
 
     def __init__(self, name: str, dataDict: dict[str, str], effDate: date) -> None:
         self.name: str = name
-        self.ticker, self.prec = NbHolding._TICKR[name]
+        try:
+            self.ticker, self.prec = NbHolding._TICKR[name]
+        except KeyError:
+            logging.error(f"Unable to determine ticker for security named [{name}]")
+            self.ticker = "unknown"
+            self.prec = NbHolding._PREC7
         self.bal = self.asDecimal(dataDict["Current Balance ($)"])
         self.shares = self.asDecimal(dataDict["Shares or Units"])
         self.eDate: date = effDate
