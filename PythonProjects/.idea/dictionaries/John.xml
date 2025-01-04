@@ -3,14 +3,18 @@
     <words>
       <w>accesstoken</w>
       <w>asctime</w>
+      <w>auid</w>
       <w>batt</w>
       <w>circuitmapping</w>
       <w>compl</w>
       <w>courtlabel</w>
       <w>datefmt</w>
+      <w>deadband</w>
       <w>derate</w>
       <w>derated</w>
       <w>dtls</w>
+      <w>etag</w>
+      <w>gitreps</w>
       <w>hdrs</w>
       <w>hldn</w>
       <w>intrfc</w>
@@ -21,6 +25,8 @@
       <w>parms</w>
       <w>prec</w>
       <w>retrys</w>
+      <w>setpoint</w>
+      <w>setpoints</w>
       <w>swal</w>
       <w>tbody</w>
       <w>thead</w>
