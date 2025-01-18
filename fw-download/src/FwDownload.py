@@ -1,4 +1,5 @@
 
+# noinspection PyPackageRequirements
 import __main__
 import locale
 import logging
