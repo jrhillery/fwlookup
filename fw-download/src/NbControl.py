@@ -85,7 +85,7 @@ class NbControl(AbstractContextManager["NbControl"]):
             self.webDriver = webdriver.Chrome(options=crOpts)
             self.loginWait = WebDriverWait(self.webDriver, timedelta(minutes=5).seconds)
             self.pageDrawWait = WebDriverWait(self.webDriver, 8)
-            self.logoutWait = WebDriverWait(self.webDriver, timedelta(minutes=30).seconds)
+            self.logoutWait = WebDriverWait(self.webDriver, timedelta(minutes=45).seconds)
 
             return self.webDriver
         except WebDriverException as e:
