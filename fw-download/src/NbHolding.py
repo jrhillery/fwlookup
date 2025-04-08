@@ -17,6 +17,7 @@ class NbHolding(object):
               "HI YLD EMG MKT BOND" : ("NON40OJFI", _PREC6),
               "INFL PROTECTED BOND" : ("NON40OJFB", _PREC7),
               "INTEREST INCOME FUND": ("NON40OJFA", _PREC7),
+              "INTL STOCK MKT IDX"  : ("NON40OJFF", _PREC7),
               "PIM INTL BD US$H I"  : ("PFORX"    , _PREC2),
               "TARGETRETIREMENT2040": ("NON40OJGZ", _PREC7),
               "TOTAL BOND MARKET"   : ("NON40OJFC", _PREC7)}
