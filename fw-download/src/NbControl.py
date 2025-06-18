@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Iterator
 
 from selenium import webdriver
-from selenium.common import NoSuchWindowException, WebDriverException
+from selenium.common import NoSuchWindowException, StaleElementReferenceException, WebDriverException
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
@@ -92,6 +92,16 @@ class NbControl(AbstractContextManager["NbControl"]):
             raise NbException.fromXcp("open browser with " + NbControl.CHROME_USER_DATA, e) from e
     # end getHoldingsDriver()
 
+    def robustLogin(self) -> WebElement:
+        while True:
+            try:
+                return self.loginWait.until(element_to_be_clickable(NbControl.PLUS_PLAN_LINK),
+                                            "Timed out waiting to log-in")
+            except StaleElementReferenceException as e:
+                logging.info(f"Retrying log-in due to {e.__class__.__name__}.")
+        # end while trying to log-in
+    # end robustLogin()
+
     def navigateToHoldingsDetails(self) -> bool:
         ifXcptionMsg = "open log-in page " + NbControl.NB_LOG_IN
         try:
@@ -100,8 +110,7 @@ class NbControl(AbstractContextManager["NbControl"]):
 
             # wait for user to log-in
             ifXcptionMsg = "log-in"
-            link = self.loginWait.until(element_to_be_clickable(NbControl.PLUS_PLAN_LINK),
-                                        "Timed out waiting to log-in")
+            link = self.robustLogin()
             self.loggedIn = True
 
             ifXcptionMsg = "select 401(k) Plus Plan link"
@@ -123,7 +132,7 @@ class NbControl(AbstractContextManager["NbControl"]):
 
             return True
         except NoSuchWindowException:
-            logging.info(f"Browser gone ({ifXcptionMsg})")
+            logging.info(f"Browser gone ({ifXcptionMsg}).")
 
             return False
         except WebDriverException as e:
