@@ -2,8 +2,8 @@
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
-    <content url="file://$MODULE_DIR$/../../pacium">
-      <sourceFolder url="file://$MODULE_DIR$/../../pacium/src" isTestSource="false" />
+    <content url="file://$USER_HOME$/gitreps/pacium">
+      <sourceFolder url="file://$USER_HOME$/gitreps/pacium/src" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
