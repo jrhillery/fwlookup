@@ -5,7 +5,7 @@
     <content url="file://$USER_HOME$/gitreps/car-projects">
       <sourceFolder url="file://$USER_HOME$/gitreps/car-projects/src" isTestSource="false" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="Python 3.12 virtualenv at C:\Users\John\.venv\car-projects" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
