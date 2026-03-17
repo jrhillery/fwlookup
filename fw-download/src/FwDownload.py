@@ -42,8 +42,6 @@ class FwDownload(object):
                                      f"NbPosition{nbCtl.effectiveDate}").with_suffix(".csv")
 
         with open(outFn, "w", newline="") as csvFile:
-            writer = DictWriter(csvFile, fieldnames=())
-
             for i, hldn in enumerate(nbCtl.getHoldings()):
                 logging.info(str(hldn))
                 row = {cp["col.account.num"]: nbCtl.planId,
@@ -55,7 +53,7 @@ class FwDownload(object):
                        cp["col.date"]:        hldn.eDate}
 
                 if i == 0:
-                    writer.fieldnames = row.keys()
+                    writer = DictWriter(csvFile, row.keys())
                     writer.writeheader()
                 writer.writerow(row)
             # end for each holding
