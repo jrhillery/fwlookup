@@ -15,29 +15,21 @@ from util import Configure
 class FwDownload(object):
 
     def __init__(self):
-        self.csvProps: dict[str, str] = {}
+        """Retrieve the CSV properties"""
+        props = Path("..", "..", "MdHobby", "fwimport", "src", "main", "resources", "fw-import")
+        cParser = ConfigParser()
+
+        with open(props.with_suffix(".properties")) as lines:
+            # Python 3.12 ConfigParser requires a section header, so prepend one named {}
+            lines = chain(("[{}]", ), lines)
+            cParser.read_file(lines)
+
+        self.csvProps = dict(cParser.items("{}"))
 
     # end __init__()
 
-    def getCsvProps(self) -> dict[str, str]:
-        """Retrieve the CSV properties"""
-        if not self.csvProps:
-            props = Path("..", "..", "MdHobby", "fwimport", "src", "main", "resources", "fw-import")
-            cParser = ConfigParser()
-
-            with open(props.with_suffix(".properties")) as lines:
-                # Python 3.12 ConfigParser requires a section header, so prepend one named {}
-                lines = chain(("[{}]", ), lines)
-                cParser.read_file(lines)
-
-            self.csvProps = dict(cParser.items("{}"))
-        # end if no props
-
-        return self.csvProps
-    # end getCsvProps()
-
     def writeCsv(self, nbCtl: NbControl) -> None:
-        cp = self.getCsvProps()
+        cp = self.csvProps
         outFn = Path.home().joinpath("Downloads",
                                      f"NbPosition{nbCtl.effectiveDate}").with_suffix(".csv")
 
