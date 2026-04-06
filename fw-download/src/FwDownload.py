@@ -15,7 +15,7 @@ from util import Configure
 class FwDownload(object):
 
     def __init__(self):
-        self.csvProps: dict[str, str] | None = None
+        self.csvProps: dict[str, str] = {}
 
     # end __init__()
 
@@ -91,4 +91,4 @@ if __name__ == "__main__":
         logging.error(xcption)
         logging.debug(f"{xcption.__class__.__name__} suppressed:", exc_info=xcption)
 
-    logging.info(f"Exiting {Path(__main__.__file__).stem}.")
+    logging.info(f"Exiting {Path(__main__.__file__ or "no file name").stem}.")
