@@ -22,7 +22,7 @@ class FwDownload(object):
     def getCsvProps(self) -> dict[str, str]:
         """Retrieve the CSV properties"""
         if not self.csvProps:
-            props = Path("resources", "fw-import")
+            props = Path("..", "..", "MdHobby", "fwimport", "src", "main", "resources", "fw-import")
             cParser = ConfigParser()
 
             with open(props.with_suffix(".properties")) as lines:
