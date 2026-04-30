@@ -1,12 +1,13 @@
 
 # noinspection PyPackageRequirements
 import __main__
+from pathlib import Path
+
 import locale
 import logging
 from configparser import ConfigParser
 from csv import DictWriter
 from itertools import chain
-from pathlib import Path
 
 from NbControl import NbControl
 from util import Configure
@@ -21,7 +22,8 @@ class FwDownload(object):
 
         with open(props.with_suffix(".properties")) as lines:
             # Python 3.12 ConfigParser requires a section header, so prepend one named {}
-            lines = chain(("[{}]", ), lines)
+            sectionHeader: tuple[str, ...] = ("[{}]", )
+            lines = chain(sectionHeader, lines)
             cParser.read_file(lines)
 
         self.csvProps = dict(cParser.items("{}"))
@@ -57,8 +59,6 @@ class FwDownload(object):
     def downloadHoldings(self) -> None:
 
         with NbControl() as nbCtl:
-            nbCtl.getHoldingsDriver()
-
             if nbCtl.navigateToHoldingsDetails():
                 self.writeCsv(nbCtl)
 

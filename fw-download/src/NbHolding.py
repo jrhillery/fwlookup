@@ -27,7 +27,7 @@ class NbHolding(object):
         if not NbHolding._currencySymbol:
             NbHolding._currencySymbol = locale.localeconv()["currency_symbol"]
 
-        return NbHolding._currencySymbol
+        return NbHolding._currencySymbol or "$"
     # end currencySymbol()
 
     @staticmethod

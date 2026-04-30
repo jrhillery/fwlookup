@@ -45,10 +45,10 @@ class NbControl(AbstractContextManager["NbControl"]):
 
     def __init__(self):
         self.autoStartBrowser = False
-        self.webDriver: WebDriver | None = None
-        self.loginWait: WebDriverWait | None = None
-        self.pageDrawWait: WebDriverWait | None = None
-        self.logoutWait: WebDriverWait | None = None
+        self.webDriver = self.getHoldingsDriver()
+        self.loginWait = WebDriverWait(self.webDriver, timedelta(minutes=5).seconds)
+        self.pageDrawWait = WebDriverWait(self.webDriver, 8)
+        self.logoutWait = WebDriverWait(self.webDriver, timedelta(minutes=45).seconds)
         self.loggedIn = False
         self.planId: str | None = None
         self.effectiveDate: date = date.today()
@@ -82,12 +82,8 @@ class NbControl(AbstractContextManager["NbControl"]):
                 crOpts.add_experimental_option("excludeSwitches", ["enable-logging"])
             else:
                 crOpts.add_experimental_option("debuggerAddress", self.CHROME_DEBUGGER_ADDRESS)
-            self.webDriver = webdriver.Chrome(options=crOpts)
-            self.loginWait = WebDriverWait(self.webDriver, timedelta(minutes=5).seconds)
-            self.pageDrawWait = WebDriverWait(self.webDriver, 8)
-            self.logoutWait = WebDriverWait(self.webDriver, timedelta(minutes=45).seconds)
 
-            return self.webDriver
+            return webdriver.Chrome(options=crOpts)
         except WebDriverException as e:
             raise NbException.fromXcp("open browser with " + NbControl.CHROME_USER_DATA, e) from e
     # end getHoldingsDriver()
