@@ -101,6 +101,10 @@ class NbControl(AbstractContextManager["NbControl"]):
     def navigateToHoldingsDetails(self) -> bool:
         ifXcptionMsg = "open log-in page " + NbControl.NB_LOG_IN
         try:
+            # wait for browser to open
+            self.pageDrawWait.until(lambda d: d.current_url is not None,
+                                    "Timed out waiting for browser to open")
+
             # open NetBenefits log-in page
             self.webDriver.get(NbControl.NB_LOG_IN)
 
