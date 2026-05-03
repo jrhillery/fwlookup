@@ -2,10 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/Home-Assistant-Dew-Point.iml" filepath="$PROJECT_DIR$/Home-Assistant-Dew-Point.iml" />
       <module fileurl="file://$PROJECT_DIR$/PythonProjects.iml" filepath="$PROJECT_DIR$/PythonProjects.iml" />
       <module fileurl="file://$PROJECT_DIR$/car-projects.iml" filepath="$PROJECT_DIR$/car-projects.iml" />
       <module fileurl="file://$PROJECT_DIR$/fw-download.iml" filepath="$PROJECT_DIR$/fw-download.iml" />
-      <module fileurl="file://$USER_HOME$/gitreps/home-projects/heat-cool/heat-cool.iml" filepath="$USER_HOME$/gitreps/home-projects/heat-cool/heat-cool.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../home-projects/heat-cool/heat-cool.iml" filepath="$PROJECT_DIR$/../../home-projects/heat-cool/heat-cool.iml" />
       <module fileurl="file://$PROJECT_DIR$/nexia.iml" filepath="$PROJECT_DIR$/nexia.iml" />
       <module fileurl="file://$PROJECT_DIR$/pacium.iml" filepath="$PROJECT_DIR$/pacium.iml" />
     </modules>
