@@ -10,11 +10,10 @@ class NbHolding(object):
 
     _currencySymbol: str | None = None
     _PREC2 = Decimal("0.00")
-    _PREC6 = Decimal("0.000000")
     _PREC7 = Decimal("0.0000000")
     # noinspection SpellCheckingInspection
     _TICKR = {"AGGRESSIVE"          : ("NON40OJGH", _PREC7),
-              "HI YLD EMG MKT BOND" : ("NON40OJFI", _PREC6),
+              "HI YLD EMG MKT BOND" : ("NON40OJFI", _PREC7),
               "INFL PROTECTED BOND" : ("NON40OJFB", _PREC7),
               "INTEREST INCOME FUND": ("NON40OJFA", _PREC7),
               "INTL STOCK MKT IDX"  : ("NON40OJFF", _PREC7),
