@@ -1,19 +1,21 @@
 # Use Selenium web driver to launch and control a browser session
+from pathlib import Path
+
 import logging
+import re
 from contextlib import AbstractContextManager
 from datetime import date, datetime, timedelta
 from http.client import HTTPConnection
-from pathlib import Path
-from typing import Iterator
-
 from selenium import webdriver
 from selenium.common import NoSuchWindowException, StaleElementReferenceException, WebDriverException
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.expected_conditions import (
-    any_of, element_to_be_clickable, visibility_of_element_located)
+    any_of, element_to_be_clickable, presence_of_element_located, visibility_of_element_located)
+from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
+from typing import Iterator
 
 from NbHolding import NbHolding
 
@@ -36,10 +38,12 @@ class NbControl(AbstractContextManager["NbControl"]):
     CHROME_DEBUGGER_ADDRESS = "localhost:14001"
     NB_LOG_IN = "https://nb.fidelity.com/public/nb/default/home"
     PLUS_PLAN_LINK = By.LINK_TEXT, "IBM 401(K) PLAN"
-    DETAILS_LINK = By.CSS_SELECTOR, "#holdings-section .show-details-link"
-    HOLDINGS_HEADER_LOCATOR = By.ID, "modal-header--holdings"
-    FOLLOWING_SIBLING_LOCATOR = By.XPATH, "./following-sibling::*"
-    HOLDINGS_TABLE_LOCATOR = By.ID, "holdingsTable"
+    SUBHEADING_LOCATOR = By.ID, "page_subheading"
+    HOLDINGS_LINK = By.ID, "investments-holdings"
+    DETAILS_LINK = By.ID, "investments-holdings-details-launcher-btn"
+    SELECT_LOCATOR = By.CSS_SELECTOR, "select[aria-label=\"Select the investment data you'd like to see:\"]"
+    AS_OF_DATE_LOCATOR = By.ID, "investments-holdings-details-modal-asofdate"
+    HOLDINGS_TABLE_LOCATOR = By.ID, "holdings-modal-table-container"
     FIDELITY_LOGOUT_LOCATOR = By.CSS_SELECTOR, "h1#content-body-top-heading-tcm\\:526-223203"
     NETBENEFITS_LOGOUT_LOCATOR = By.CSS_SELECTOR, "h1#dom-login-header"
 
@@ -47,10 +51,10 @@ class NbControl(AbstractContextManager["NbControl"]):
         self.autoStartBrowser = False
         self.webDriver = self.getHoldingsDriver()
         self.loginWait = WebDriverWait(self.webDriver, timedelta(minutes=5).seconds)
-        self.pageDrawWait = WebDriverWait(self.webDriver, 8)
+        self.pageDrawWait = WebDriverWait(self.webDriver, 12)
         self.logoutWait = WebDriverWait(self.webDriver, timedelta(minutes=45).seconds)
         self.loggedIn = False
-        self.planId: str | None = None
+        self.planId = "unknown"
         self.effectiveDate: date = date.today()
     # end __init__()
 
@@ -116,19 +120,31 @@ class NbControl(AbstractContextManager["NbControl"]):
             ifXcptionMsg = "select 401(k) Plus Plan link"
             self.webDriver.execute_script("arguments[0].click();", link)
 
-            ifXcptionMsg = "render holdings details"
-            link = self.pageDrawWait.until(element_to_be_clickable(NbControl.DETAILS_LINK),
-                                           "Timed out waiting for holdings page")
+            ifXcptionMsg = "reading plan id"
+            subhead = self.pageDrawWait.until(visibility_of_element_located(NbControl.SUBHEADING_LOCATOR),
+                                              "Timed out waiting to read plan id").text
             logging.info(f"Obtaining price data from {self.webDriver.title}.")
+            if subhead and (match := re.search(r"\((\d+)\)$", subhead)): # IBM 401(K) PLAN (30200)
+                self.planId = match.group(1)
+
+            ifXcptionMsg = "render holdings summary"
+            link = self.pageDrawWait.until(element_to_be_clickable(NbControl.HOLDINGS_LINK),
+                                           "Timed out waiting for holdings summary")
             self.webDriver.execute_script("arguments[0].click();", link)
 
-            # lookup plan identifier
-            self.planId = self.webDriver.execute_script("return planId")
+            ifXcptionMsg = "render holdings details"
+            link = self.pageDrawWait.until(element_to_be_clickable(NbControl.DETAILS_LINK),
+                                           "Timed out waiting for holdings details")
+            self.webDriver.execute_script("arguments[0].click();", link)
+
+            ifXcptionMsg = "select share details"
+            dropdown = Select(self.pageDrawWait.until(presence_of_element_located(NbControl.SELECT_LOCATOR),
+                                                      "Timed out waiting to select share details"))
+            dropdown.select_by_value("sharesUnitsLabel")
 
             ifXcptionMsg = "find effective date"
-            dateShown = self.webDriver.find_element(*NbControl.HOLDINGS_HEADER_LOCATOR) \
-                .find_element(*NbControl.FOLLOWING_SIBLING_LOCATOR).text
-            self.effectiveDate = datetime.strptime(dateShown, "Data as of %m/%d/%y").date()
+            dateShown = self.webDriver.find_element(*NbControl.AS_OF_DATE_LOCATOR).text
+            self.effectiveDate = datetime.strptime(dateShown, "As of %b-%d-%Y").date() # As of Sep-09-2026
 
             return True
         except NoSuchWindowException:
@@ -146,19 +162,19 @@ class NbControl(AbstractContextManager["NbControl"]):
             # lookup data for holdings
             hTbl: WebElement = self.webDriver.find_element(*NbControl.HOLDINGS_TABLE_LOCATOR)
             tHdrs: list[str] = [hdr.text for hdr in
-                hTbl.find_elements(By.CSS_SELECTOR, "thead > tr > th")]
+                hTbl.find_elements(By.CSS_SELECTOR, "table > thead > tr > th")]
             bodyRows: Iterator[WebElement] = iter(
-                hTbl.find_elements(By.CSS_SELECTOR, "tbody > tr"))
+                hTbl.find_elements(By.CSS_SELECTOR, "table > tbody > tr"))
 
             # yield a holding for each pair of rows
             ifXcptionMsg = "find holdings data"
             nRow: WebElement | None = next(bodyRows, None)
             while nRow:
-                hldnName: str = nRow.find_element(By.TAG_NAME, "a").text
                 dataDict = {ky: dat.text for ky, dat in
-                    zip(tHdrs, next(bodyRows).find_elements(By.TAG_NAME, "td"))}
+                    zip(tHdrs, nRow.find_elements(By.TAG_NAME, "td"))}
 
-                yield NbHolding(hldnName, dataDict, self.effectiveDate)
+                if dataDict["Investment"] != "Total":
+                    yield NbHolding(dataDict, self.effectiveDate)
                 nRow = next(bodyRows, None)
             # end while nRow
         except WebDriverException as e:

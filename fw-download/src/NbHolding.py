@@ -37,18 +37,18 @@ class NbHolding(object):
         return Decimal(stripedVal)
     # end asDecimal(str)
 
-    def __init__(self, name: str, dataDict: dict[str, str], effDate: date) -> None:
-        self.name: str = name
+    def __init__(self, dataDict: dict[str, str], effDate: date) -> None:
+        self.name: str = dataDict["Investment"]
         try:
-            self.ticker, self.prec = NbHolding._TICKR[name]
+            self.ticker, self.prec = NbHolding._TICKR[self.name]
         except KeyError:
-            logging.error(f"Unable to determine ticker for security named [{name}]")
+            logging.error(f"Unable to determine ticker for security [{self.name}]")
             self.ticker = "unknown"
             self.prec = NbHolding._PREC7
-        self.bal = self.asDecimal(dataDict["Current Balance ($)"])
-        self.shares = self.asDecimal(dataDict["Shares or Units"])
+        self.bal = self.asDecimal(dataDict["Current balance"])
+        self.shares = self.asDecimal(dataDict["Shares/Units"])
         self.eDate: date = effDate
-    # end __init__(str, dict[str, str], date)
+    # end __init__(dict[str, str], date)
 
     def getPrice(self) -> Decimal:
         prc = self.bal / self.shares
