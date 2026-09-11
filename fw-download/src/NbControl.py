@@ -126,6 +126,8 @@ class NbControl(AbstractContextManager["NbControl"]):
             logging.info(f"Obtaining price data from {self.webDriver.title}.")
             if subhead and (match := re.search(r"\((\d+)\)$", subhead)): # IBM 401(K) PLAN (30200)
                 self.planId = match.group(1)
+            else:
+                logging.error(f"Unable to determine plan id from [{subhead}].")
 
             ifXcptionMsg = "render holdings summary"
             link = self.pageDrawWait.until(element_to_be_clickable(NbControl.HOLDINGS_LINK),
@@ -160,23 +162,19 @@ class NbControl(AbstractContextManager["NbControl"]):
         ifXcptionMsg = "find holdings table"
         try:
             # lookup data for holdings
-            hTbl: WebElement = self.webDriver.find_element(*NbControl.HOLDINGS_TABLE_LOCATOR)
-            tHdrs: list[str] = [hdr.text for hdr in
+            hTbl = self.webDriver.find_element(*NbControl.HOLDINGS_TABLE_LOCATOR)
+            tHdrs = [hdr.text for hdr in
                 hTbl.find_elements(By.CSS_SELECTOR, "table > thead > tr > th")]
-            bodyRows: Iterator[WebElement] = iter(
-                hTbl.find_elements(By.CSS_SELECTOR, "table > tbody > tr"))
+            bodyRows = hTbl.find_elements(By.CSS_SELECTOR, "table > tbody > tr")
 
-            # yield a holding for each pair of rows
             ifXcptionMsg = "find holdings data"
-            nRow: WebElement | None = next(bodyRows, None)
-            while nRow:
+            for bRow in bodyRows:
                 dataDict = {ky: dat.text for ky, dat in
-                    zip(tHdrs, nRow.find_elements(By.TAG_NAME, "td"))}
+                    zip(tHdrs, bRow.find_elements(By.TAG_NAME, "td"))}
 
                 if dataDict["Investment"] != "Total":
                     yield NbHolding(dataDict, self.effectiveDate)
-                nRow = next(bodyRows, None)
-            # end while nRow
+            # end for bRow
         except WebDriverException as e:
             raise NbException.fromXcp(ifXcptionMsg, e) from e
     # end getHoldings()
