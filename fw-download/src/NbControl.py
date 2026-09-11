@@ -24,10 +24,12 @@ class NbException(Exception):
     """Class for handled exceptions"""
 
     @classmethod
-    def fromXcp(cls, unableMsg: str, xcption: WebDriverException):
-        """Factory method for WebDriverExceptions"""
-        return cls(f"Unable to {unableMsg}, {xcption.__class__.__name__}: {xcption.msg}")
-    # end fromXcp(str, WebDriverException)
+    def fromXcp(cls, unableMsg: str, xcption: Exception):
+        """Factory method with special logic for WebDriverExceptions"""
+        msg = xcption.msg if isinstance(xcption, WebDriverException) else str(xcption)
+
+        return cls(f"Unable to {unableMsg}, {xcption.__class__.__name__}: {msg}")
+    # end fromXcp(str, Exception)
 
 # end class NbException
 
@@ -172,10 +174,10 @@ class NbControl(AbstractContextManager["NbControl"]):
                 dataDict = {ky: dat.text for ky, dat in
                     zip(tHdrs, bRow.find_elements(By.TAG_NAME, "td"))}
 
-                if dataDict["Investment"] != "Total":
+                if dataDict[NbHolding.NAME] != "Total":
                     yield NbHolding(dataDict, self.effectiveDate)
             # end for bRow
-        except WebDriverException as e:
+        except Exception as e:
             raise NbException.fromXcp(ifXcptionMsg, e) from e
     # end getHoldings()
 

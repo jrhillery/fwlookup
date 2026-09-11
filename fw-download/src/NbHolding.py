@@ -8,6 +8,10 @@ from decimal import Decimal, ROUND_HALF_EVEN
 class NbHolding(object):
     """Houses details for a holding"""
 
+    NAME = "Investment"
+    BALANCE = "Current balance"
+    SHARES = "Shares/Units"
+
     _currencySymbol: str | None = None
     _PREC2 = Decimal("0.00")
     _PREC7 = Decimal("0.0000000")
@@ -38,15 +42,15 @@ class NbHolding(object):
     # end asDecimal(str)
 
     def __init__(self, dataDict: dict[str, str], effDate: date) -> None:
-        self.name: str = dataDict["Investment"]
+        self.name: str = dataDict[NbHolding.NAME]
         try:
             self.ticker, self.prec = NbHolding._TICKR[self.name]
         except KeyError:
             logging.error(f"Unable to determine ticker for security [{self.name}]")
             self.ticker = "unknown"
             self.prec = NbHolding._PREC7
-        self.bal = self.asDecimal(dataDict["Current balance"])
-        self.shares = self.asDecimal(dataDict["Shares/Units"])
+        self.bal = self.asDecimal(dataDict[NbHolding.BALANCE])
+        self.shares = self.asDecimal(dataDict[NbHolding.SHARES])
         self.eDate: date = effDate
     # end __init__(dict[str, str], date)
 
