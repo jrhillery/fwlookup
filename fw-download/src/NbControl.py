@@ -10,7 +10,6 @@ from selenium import webdriver
 from selenium.common import NoSuchWindowException, StaleElementReferenceException, WebDriverException
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.expected_conditions import (
     any_of, element_to_be_clickable, presence_of_element_located, visibility_of_element_located)
 from selenium.webdriver.support.select import Select
@@ -94,16 +93,6 @@ class NbControl(AbstractContextManager["NbControl"]):
             raise NbException.fromXcp("open browser with " + NbControl.CHROME_USER_DATA, e) from e
     # end getHoldingsDriver()
 
-    def robustLogin(self) -> WebElement:
-        while True:
-            try:
-                return self.loginWait.until(element_to_be_clickable(NbControl.PLUS_PLAN_LINK),
-                                            "Timed out waiting to log-in")
-            except StaleElementReferenceException as e:
-                logging.info(f"Retrying log-in due to {e.__class__.__name__}.")
-        # end while trying to log-in
-    # end robustLogin()
-
     def navigateToHoldingsDetails(self) -> bool:
         ifXcptionMsg = "open log-in page " + NbControl.NB_LOG_IN
         try:
@@ -115,12 +104,19 @@ class NbControl(AbstractContextManager["NbControl"]):
             self.webDriver.get(NbControl.NB_LOG_IN)
 
             # wait for user to log-in
-            ifXcptionMsg = "log-in"
-            link = self.robustLogin()
-            self.loggedIn = True
+            while True:
+                try:
+                    ifXcptionMsg = "log-in"
+                    link = self.loginWait.until(element_to_be_clickable(NbControl.PLUS_PLAN_LINK),
+                                                "Timed out waiting to log-in")
+                    self.loggedIn = True
 
-            ifXcptionMsg = "select 401(k) Plus Plan link"
-            self.webDriver.execute_script("arguments[0].click();", link)
+                    ifXcptionMsg = "select 401(k) Plus Plan link"
+                    self.webDriver.execute_script("arguments[0].click();", link)
+                    break
+                except StaleElementReferenceException as e:
+                    logging.info(f"Retrying {ifXcptionMsg} due to {e.__class__.__name__}.")
+            # end waiting for log-in
 
             ifXcptionMsg = "reading plan id"
             subhead = self.pageDrawWait.until(visibility_of_element_located(NbControl.SUBHEADING_LOCATOR),
