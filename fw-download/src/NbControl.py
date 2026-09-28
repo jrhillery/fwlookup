@@ -93,6 +93,28 @@ class NbControl(AbstractContextManager["NbControl"]):
             raise NbException.fromXcp("open browser with " + NbControl.CHROME_USER_DATA, e) from e
     # end getHoldingsDriver()
 
+    def robustClick(self, waitMsg: str, locator: tuple[str, str], clickMsg: str) -> None:
+        """Wait for, and click on, a specified element.
+
+        :param waitMsg: What we are waiting for
+        :param locator: Locator to specified element
+        :param clickMsg: What clicking is expected to do
+        """
+        while True:
+            target = waitMsg
+            try:
+                link = self.loginWait.until(element_to_be_clickable(locator),
+                                            f"Timed out waiting to {target}")
+
+                target = clickMsg
+                self.webDriver.execute_script("arguments[0].click();", link)
+                return
+            except StaleElementReferenceException as e:
+                logging.info(f"Retrying {target} due to {e.__class__.__name__}.")
+            except WebDriverException as e:
+                raise NbException.fromXcp(target, e) from e
+    # end robustClick(str, tuple[str, str], str)
+
     def navigateToHoldingsDetails(self) -> bool:
         ifXcptionMsg = "open log-in page " + NbControl.NB_LOG_IN
         try:
@@ -104,19 +126,8 @@ class NbControl(AbstractContextManager["NbControl"]):
             self.webDriver.get(NbControl.NB_LOG_IN)
 
             # wait for user to log-in
-            while True:
-                try:
-                    ifXcptionMsg = "log-in"
-                    link = self.loginWait.until(element_to_be_clickable(NbControl.PLUS_PLAN_LINK),
-                                                "Timed out waiting to log-in")
-                    self.loggedIn = True
-
-                    ifXcptionMsg = "select 401(k) Plus Plan link"
-                    self.webDriver.execute_script("arguments[0].click();", link)
-                    break
-                except StaleElementReferenceException as e:
-                    logging.info(f"Retrying {ifXcptionMsg} due to {e.__class__.__name__}.")
-            # end waiting for log-in
+            self.robustClick("log-in", NbControl.PLUS_PLAN_LINK, "select 401(k) Plus Plan link")
+            self.loggedIn = True
 
             ifXcptionMsg = "reading plan id"
             subhead = self.pageDrawWait.until(visibility_of_element_located(NbControl.SUBHEADING_LOCATOR),
@@ -127,15 +138,9 @@ class NbControl(AbstractContextManager["NbControl"]):
             else:
                 logging.error(f"Unable to determine plan id from [{subhead}].")
 
-            ifXcptionMsg = "render holdings summary"
-            link = self.pageDrawWait.until(element_to_be_clickable(NbControl.HOLDINGS_LINK),
-                                           "Timed out waiting for holdings summary")
-            self.webDriver.execute_script("arguments[0].click();", link)
+            self.robustClick("see holdings link", NbControl.HOLDINGS_LINK, "render holdings summary")
 
-            ifXcptionMsg = "render holdings details"
-            link = self.pageDrawWait.until(element_to_be_clickable(NbControl.DETAILS_LINK),
-                                           "Timed out waiting for holdings details")
-            self.webDriver.execute_script("arguments[0].click();", link)
+            self.robustClick("see details link", NbControl.DETAILS_LINK, "render holdings details")
 
             ifXcptionMsg = "select share details"
             dropdown = Select(self.pageDrawWait.until(presence_of_element_located(NbControl.SELECT_LOCATOR),
