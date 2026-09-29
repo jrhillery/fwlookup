@@ -3,6 +3,7 @@ from pathlib import Path
 
 import logging
 import re
+import selenium.webdriver.support.expected_conditions as ec
 from contextlib import AbstractContextManager
 from datetime import date, datetime, timedelta
 from http.client import HTTPConnection
@@ -10,8 +11,6 @@ from selenium import webdriver
 from selenium.common import NoSuchWindowException, StaleElementReferenceException, WebDriverException
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.expected_conditions import (
-    any_of, element_to_be_clickable, presence_of_element_located, visibility_of_element_located)
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
 from typing import Iterator
@@ -41,8 +40,9 @@ class NbControl(AbstractContextManager["NbControl"]):
     PLUS_PLAN_LINK = By.LINK_TEXT, "IBM 401(K) PLAN"
     SUBHEADING_LOCATOR = By.ID, "page_subheading"
     HOLDINGS_LINK = By.ID, "investments-holdings"
-    DETAILS_LINK = By.ID, "investments-holdings-details-launcher-btn"
-    SELECT_LOCATOR = By.CSS_SELECTOR, "select[aria-label=\"Select the investment data you'd like to see:\"]"
+    DETAILS_BTN = By.ID, "investments-holdings-details-launcher-btn"
+    DATA_SELECT_LABEL = "Select the investment data you'd like to see:"
+    DATA_SELECT_LOCATOR = By.CSS_SELECTOR, f'select[aria-label="{DATA_SELECT_LABEL}"]'
     AS_OF_DATE_LOCATOR = By.ID, "investments-holdings-details-modal-asofdate"
     HOLDINGS_TABLE_LOCATOR = By.ID, "holdings-modal-table-container"
     FIDELITY_LOGOUT_LOCATOR = By.CSS_SELECTOR, "h1#content-body-top-heading-tcm\\:526-223203"
@@ -52,7 +52,7 @@ class NbControl(AbstractContextManager["NbControl"]):
         self.autoStartBrowser = False
         self.webDriver = self.getHoldingsDriver()
         self.loginWait = WebDriverWait(self.webDriver, timedelta(minutes=5).seconds)
-        self.pageDrawWait = WebDriverWait(self.webDriver, 12)
+        self.pageDrawWait = WebDriverWait(self.webDriver, 25)
         self.logoutWait = WebDriverWait(self.webDriver, timedelta(minutes=45).seconds)
         self.loggedIn = False
         self.planId = "unknown"
@@ -103,7 +103,7 @@ class NbControl(AbstractContextManager["NbControl"]):
         while True:
             target = waitMsg
             try:
-                link = self.loginWait.until(element_to_be_clickable(locator),
+                link = self.loginWait.until(ec.element_to_be_clickable(locator),
                                             f"Timed out waiting to {target}")
 
                 target = clickMsg
@@ -130,21 +130,25 @@ class NbControl(AbstractContextManager["NbControl"]):
             self.loggedIn = True
 
             ifXcptionMsg = "reading plan id"
-            subhead = self.pageDrawWait.until(visibility_of_element_located(NbControl.SUBHEADING_LOCATOR),
-                                              "Timed out waiting to read plan id").text
+            subhead = self.pageDrawWait.until(
+                ec.visibility_of_element_located(NbControl.SUBHEADING_LOCATOR),
+                "Timed out waiting to read plan id").text
             logging.info(f"Obtaining price data from {self.webDriver.title}.")
             if subhead and (match := re.search(r"\((\d+)\)$", subhead)): # IBM 401(K) PLAN (30200)
                 self.planId = match.group(1)
             else:
                 logging.error(f"Unable to determine plan id from [{subhead}].")
 
-            self.robustClick("see holdings link", NbControl.HOLDINGS_LINK, "render holdings summary")
+            self.robustClick("see holdings tab", NbControl.HOLDINGS_LINK, "render holdings summary")
 
-            self.robustClick("see details link", NbControl.DETAILS_LINK, "render holdings details")
+            self.robustClick("see details button", NbControl.DETAILS_BTN, "render holding details")
 
-            ifXcptionMsg = "select share details"
-            dropdown = Select(self.pageDrawWait.until(presence_of_element_located(NbControl.SELECT_LOCATOR),
-                                                      "Timed out waiting to select share details"))
+            ifXcptionMsg = "see data select dropdown"
+            dropdown = Select(self.pageDrawWait.until(
+                ec.visibility_of_element_located(NbControl.DATA_SELECT_LOCATOR),
+                f"Timed out waiting to {ifXcptionMsg}"))
+
+            ifXcptionMsg = "select shares"
             dropdown.select_by_value("sharesUnitsLabel")
 
             ifXcptionMsg = "find effective date"
@@ -187,9 +191,9 @@ class NbControl(AbstractContextManager["NbControl"]):
         try:
             # wait for user to log-out
             logging.info(doingMsg.capitalize() + ".")
-            self.logoutWait.until(any_of(
-                visibility_of_element_located(NbControl.FIDELITY_LOGOUT_LOCATOR),
-                visibility_of_element_located(NbControl.NETBENEFITS_LOGOUT_LOCATOR)),
+            self.logoutWait.until(ec.any_of(
+                ec.visibility_of_element_located(NbControl.FIDELITY_LOGOUT_LOCATOR),
+                ec.visibility_of_element_located(NbControl.NETBENEFITS_LOGOUT_LOCATOR)),
                 "Timed out waiting for log-out")
         except WebDriverException as e:
             raise NbException.fromXcp(doingMsg, e) from e
